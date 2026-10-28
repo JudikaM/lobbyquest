@@ -1,4 +1,46 @@
+# Dependency
 node_modules/
+
+# Rahasia & konfigurasi lingkungan
+.env
+.env.*
+!.env.example
+.npmrc
+.git-credentials
+.netrc
+credentials*.json
+docker-compose.override.yml
+
+# Kunci & sertifikat privat
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# Database lokal, backup & dump
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*.sql
+*.bak
+backup/
+backups/
+
+# File unggahan pengguna
+uploads/
+
+# Log
 npm-debug.log*
+*.log
+
+# Editor & sistem operasi
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
