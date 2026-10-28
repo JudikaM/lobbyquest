@@ -28,6 +28,7 @@ data/
 *.sqlite
 *.sqlite3
 *.sql
+!src/db/migrations/*.sql
 *.bak
 backup/
 backups/

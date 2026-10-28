@@ -4,16 +4,14 @@ Web open source untuk membuat janji mabar dan nongkrong bersama teman.
 
 Fitur yang direncanakan untuk MVP:
 
-- Membuat agenda.
+- Membuat agenda. *(sudah tersedia)*
 - Voting pilihan waktu.
 - Pembuat agenda menetapkan waktu.
 - Peserta mengonfirmasi kehadiran.
 
-Saat ini proyek masih di tahap setup dasar.
-
 ## Kebutuhan
 
-- [Node.js](https://nodejs.org/) versi 20 atau lebih baru (disarankan versi LTS terbaru)
+- [Node.js](https://nodejs.org/) versi 22 atau lebih baru (disarankan versi LTS terbaru)
 - npm (sudah termasuk saat memasang Node.js)
 
 Cek versi yang terpasang:
@@ -41,6 +39,14 @@ npm install
 Setelah server berjalan, buka <http://localhost:3000>.
 
 Cek status aplikasi di <http://localhost:3000/health>.
+
+### Database
+
+Aplikasi memakai SQLite. File database dibuat otomatis di
+`data/lobbyquest.db` saat server pertama kali berjalan, dan migrasi di
+`src/db/migrations/` dijalankan otomatis. Folder `data/` tidak ikut ke Git.
+
+Untuk mengosongkan database, hentikan server lalu hapus folder `data/`.
 
 ### Mengganti port
 
@@ -81,12 +87,21 @@ Atau jalankan lewat `npm.cmd`, misalnya `npm.cmd start`.
 
 ```
 src/
-├── server.js      # setup Express, EJS, file statis, dan menjalankan server
-├── routes.js      # daftar route aplikasi
-├── views/         # template EJS
-│   ├── partials/  # kerangka halaman (header & footer)
-│   └── home.ejs   # halaman beranda
-└── public/        # file statis (CSS)
+├── server.js          # setup Express, EJS, file statis, dan penanganan error
+├── routes.js          # daftar route aplikasi
+├── agendas.js         # validasi, penyimpanan, dan pengambilan agenda
+├── time.js            # konversi zona waktu dan format tanggal
+├── db/
+│   ├── index.js       # koneksi SQLite dan runner migrasi
+│   └── migrations/    # file .sql perubahan struktur database
+├── views/             # template EJS
+│   ├── partials/      # header, footer, dan baris pilihan waktu
+│   ├── home.ejs       # beranda
+│   ├── agenda-form.ejs # form membuat agenda
+│   ├── agenda.ejs     # detail agenda dan tautan berbagi
+│   └── error.ejs      # halaman 404 dan error
+└── public/            # file statis (CSS, JavaScript form)
+data/                  # database SQLite lokal (tidak ikut Git)
 ```
 
 ## Keamanan

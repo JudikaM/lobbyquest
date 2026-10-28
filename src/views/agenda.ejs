@@ -1,0 +1,36 @@
+<%- include('partials/header') %>
+
+<% if (justCreated) { %>
+<p class="success" role="status">Agenda berhasil dibuat. Bagikan tautan di bawah ke teman-temanmu.</p>
+<% } %>
+
+<article class="agenda">
+  <p class="badge"><%= kindLabel %></p>
+  <h1><%= agenda.title %></h1>
+
+  <% if (agenda.description) { %>
+  <p class="description"><%= agenda.description %></p>
+  <% } %>
+
+  <% if (agenda.location) { %>
+  <p><strong>Lokasi/platform:</strong> <%= agenda.location %></p>
+  <% } %>
+
+  <h2>Pilihan waktu</h2>
+  <ol class="time-options">
+    <% timeOptions.forEach((label) => { %>
+    <li><%= label %></li>
+    <% }) %>
+  </ol>
+  <p class="note">Semua waktu ditampilkan dalam <%= timezoneLabel %>.</p>
+</article>
+
+<section class="share">
+  <label class="field">
+    Tautan berbagi
+    <input type="text" value="<%= shareUrl %>" readonly onfocus="this.select()">
+  </label>
+  <p class="note"><%= privacyNotice %></p>
+</section>
+
+<%- include('partials/footer') %>
