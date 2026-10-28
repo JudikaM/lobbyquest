@@ -89,6 +89,16 @@ src/
 └── public/        # file statis (CSS)
 ```
 
+## Keamanan
+
+- Jangan menulis secret (password, token, kunci API, secret session) langsung
+  di kode. Baca dari variabel lingkungan, misalnya `process.env.SESSION_SECRET`.
+- File `.env`, database lokal, backup, dan kunci privat sudah diabaikan oleh
+  `.gitignore`. Jangan memaksa memasukkannya dengan `git add -f`.
+- Jika menemukan celah keamanan, laporkan secara privat lewat
+  [GitHub Security Advisories](https://github.com/JudikaM/lobbyquest/security/advisories/new),
+  bukan lewat issue publik.
+
 ## Catatan desain (belum final)
 
 Catatan ini menjadi pegangan untuk tahap berikutnya:
