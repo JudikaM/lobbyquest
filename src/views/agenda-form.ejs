@@ -1,0 +1,82 @@
+<%- include('partials/header') %>
+
+<h1>Buat agenda</h1>
+
+<p class="notice"><%= privacyNotice %></p>
+
+<% if (errors.length) { %>
+<div class="errors" role="alert">
+  <p>Agenda belum disimpan. Periksa kembali isian berikut:</p>
+  <ul>
+    <% errors.forEach((error) => { %>
+    <li><%= error %></li>
+    <% }) %>
+  </ul>
+</div>
+<% } %>
+
+<form class="form" method="post" action="/agenda">
+  <label class="field">
+    Judul
+    <input type="text" name="title" value="<%= values.title %>"
+      required minlength="<%= limits.titleMin %>" maxlength="<%= limits.title %>"
+      placeholder="Contoh: Mabar ranked Sabtu malam">
+  </label>
+
+  <fieldset class="field">
+    <legend>Jenis</legend>
+    <div class="choices">
+      <% Object.entries(kinds).forEach(([value, label]) => { %>
+      <label class="choice">
+        <input type="radio" name="kind" value="<%= value %>" required
+          <%= values.kind === value ? 'checked' : '' %>>
+        <%= label %>
+      </label>
+      <% }) %>
+    </div>
+  </fieldset>
+
+  <label class="field">
+    Deskripsi <span class="optional">(opsional)</span>
+    <textarea name="description" rows="3" maxlength="<%= limits.description %>"><%= values.description %></textarea>
+  </label>
+
+  <label class="field">
+    Lokasi umum atau platform <span class="optional">(opsional)</span>
+    <input type="text" name="location" value="<%= values.location %>"
+      maxlength="<%= limits.location %>" placeholder="Contoh: Discord, atau kafe di Blok M">
+    <small>Cukup lokasi umum. Jangan tulis alamat rumah.</small>
+  </label>
+
+  <label class="field">
+    Zona waktu
+    <select name="timezone">
+      <% Object.entries(timezones).forEach(([value, label]) => { %>
+      <option value="<%= value %>" <%= values.timezone === value ? 'selected' : '' %>>
+        <%= label %> (<%= value %>)
+      </option>
+      <% }) %>
+    </select>
+  </label>
+
+  <fieldset class="field">
+    <legend>Pilihan waktu</legend>
+    <small>Isi 2 sampai <%= maxSlots %> pilihan. Baris yang kosong diabaikan.</small>
+    <div class="slots" data-slots data-max="<%= maxSlots %>">
+      <% values.slots.forEach((slot, i) => { %>
+      <%- include('partials/slot-row', { slot, number: i + 1 }) %>
+      <% }) %>
+    </div>
+    <button type="button" class="secondary-button" data-add-slot hidden>+ Tambah pilihan waktu</button>
+  </fieldset>
+
+  <template id="slot-template">
+    <%- include('partials/slot-row', { slot: { start: '', end: '' }, number: '' }) %>
+  </template>
+
+  <button type="submit" class="primary-button">Buat agenda</button>
+</form>
+
+<script src="/agenda-form.js"></script>
+
+<%- include('partials/footer') %>
