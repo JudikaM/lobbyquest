@@ -1,7 +1,7 @@
 const express = require('express');
 const agendas = require('./agendas');
 const votes = require('./votes');
-const { TIMEZONES, DEFAULT_TIMEZONE, formatRange } = require('./time');
+const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, utcToLocalInput } = require('./time');
 
 const router = express.Router();
 
@@ -14,10 +14,13 @@ function renderForm(res, values, errors = []) {
   // Form selalu menampilkan minimal dua baris pilihan waktu.
   const slots = [...values.slots];
   while (slots.length < agendas.MIN_SLOTS) slots.push({ start: '', end: '' });
+  // Batas bawah pemilih tanggal: waktu sekarang di zona yang dipilih.
+  const timezone = Object.hasOwn(TIMEZONES, values.timezone) ? values.timezone : DEFAULT_TIMEZONE;
 
   res.render('agenda-form', {
     title: 'Buat agenda',
     values: { ...values, slots },
+    minDateTime: utcToLocalInput(new Date(), timezone),
     errors,
     privacyNotice: PRIVACY_NOTICE,
     kinds: agendas.KINDS,

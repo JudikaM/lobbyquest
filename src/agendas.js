@@ -1,6 +1,6 @@
 const crypto = require('node:crypto');
 const db = require('./db');
-const { TIMEZONES, DEFAULT_TIMEZONE, localToUtc } = require('./time');
+const { TIMEZONES, DEFAULT_TIMEZONE, localToUtc, formatMoment } = require('./time');
 
 const KINDS = { mabar: 'Mabar', nongkrong: 'Nongkrong' };
 const LIMITS = { titleMin: 3, title: 100, description: 1000, location: 150 };
@@ -74,7 +74,10 @@ function validateAgenda(body = {}, now = new Date()) {
       return;
     }
     if (startsAt <= now) {
-      errors.push(`${label}: waktu mulai sudah lewat.`);
+      errors.push(
+        `${label}: waktu mulai (${formatMoment(startsAt, values.timezone)}) sudah lewat. ` +
+        `Sekarang ${formatMoment(now, values.timezone)}.`
+      );
       return;
     }
 

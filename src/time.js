@@ -46,6 +46,27 @@ function localToUtc(value, timeZone) {
   return new Date(asUtc - offsetMs(asUtc, timeZone));
 }
 
+// Kebalikan localToUtc: nilai untuk input datetime-local di timeZone,
+// dibulatkan ke atas ke menit berikutnya. Dipakai untuk atribut `min`.
+function utcToLocalInput(date, timeZone) {
+  const timestamp = Math.ceil(date.getTime() / 60000) * 60000;
+  return new Date(timestamp + offsetMs(timestamp, timeZone)).toISOString().slice(0, 16);
+}
+
+// Contoh: "Kamis, 29 Oktober 2026, 09.10 WIB".
+function formatMoment(date, timeZone) {
+  const text = new Intl.DateTimeFormat('id-ID', {
+    timeZone,
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+  return `${text} ${TIMEZONES[timeZone] || timeZone}`;
+}
+
 // Contoh: "Minggu, 1 November 2026, 19.00–22.00 WIB".
 function formatRange(startsAt, endsAt, timeZone) {
   const date = new Intl.DateTimeFormat('id-ID', {
@@ -66,4 +87,11 @@ function formatRange(startsAt, endsAt, timeZone) {
   return `${date.format(start)}, ${time.format(start)} – ${date.format(end)}, ${time.format(end)} ${zone}`;
 }
 
-module.exports = { TIMEZONES, DEFAULT_TIMEZONE, localToUtc, formatRange };
+module.exports = {
+  TIMEZONES,
+  DEFAULT_TIMEZONE,
+  localToUtc,
+  utcToLocalInput,
+  formatMoment,
+  formatRange,
+};
