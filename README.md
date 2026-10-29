@@ -5,7 +5,7 @@ Web open source untuk membuat janji mabar dan nongkrong bersama teman.
 Fitur yang direncanakan untuk MVP:
 
 - Membuat agenda. *(sudah tersedia)*
-- Voting pilihan waktu.
+- Voting pilihan waktu. *(sudah tersedia)*
 - Pembuat agenda menetapkan waktu.
 - Peserta mengonfirmasi kehadiran.
 
@@ -90,6 +90,7 @@ src/
 ├── server.js          # setup Express, EJS, file statis, dan penanganan error
 ├── routes.js          # daftar route aplikasi
 ├── agendas.js         # validasi, penyimpanan, dan pengambilan agenda
+├── votes.js           # peserta, suara, dan rekap pilihan waktu
 ├── time.js            # konversi zona waktu dan format tanggal
 ├── db/
 │   ├── index.js       # koneksi SQLite dan runner migrasi
@@ -118,8 +119,10 @@ data/                  # database SQLite lokal (tidak ikut Git)
 
 Catatan ini menjadi pegangan untuk tahap berikutnya:
 
-- **Nama peserta bukan identitas.** Setiap peserta diwakili ID/token peserta,
-  sehingga dua orang dengan nama yang sama tetap dibedakan.
+- **Nama peserta bukan identitas.** Setiap peserta diwakili token acak yang
+  disimpan di cookie `httpOnly` khusus agenda tersebut. Database hanya
+  menyimpan hash token, sehingga dua orang dengan nama yang sama tetap
+  dibedakan dan suara hanya bisa diubah dari browser yang sama.
 - **Akses pengelola diverifikasi di server.** Token rahasia pengelola tidak
   boleh terus dibawa di URL. Setelah diverifikasi sekali, akses disimpan
   dengan cara lain (misalnya cookie), dan setiap aksi pengelola dicek di server.
