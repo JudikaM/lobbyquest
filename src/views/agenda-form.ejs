@@ -37,12 +37,12 @@
   </fieldset>
 
   <label class="field">
-    Deskripsi <span class="optional">(opsional)</span>
+    <span>Deskripsi <span class="optional">(opsional)</span></span>
     <textarea name="description" rows="3" maxlength="<%= limits.description %>"><%= values.description %></textarea>
   </label>
 
   <label class="field">
-    Lokasi umum atau platform <span class="optional">(opsional)</span>
+    <span>Lokasi umum atau platform <span class="optional">(opsional)</span></span>
     <input type="text" name="location" value="<%= values.location %>"
       maxlength="<%= limits.location %>" placeholder="Contoh: Discord, atau kafe di Blok M">
     <small>Cukup lokasi umum. Jangan tulis alamat rumah.</small>
@@ -61,7 +61,10 @@
 
   <fieldset class="field">
     <legend>Pilihan waktu</legend>
-    <small>Isi 2 sampai <%= maxSlots %> pilihan. Baris yang kosong diabaikan.</small>
+    <small>
+      Isi 2 sampai <%= maxSlots %> pilihan di masa depan, dalam zona waktu yang dipilih di atas.
+      Baris yang kosong diabaikan.
+    </small>
     <div class="slots" data-slots data-max="<%= maxSlots %>">
       <% values.slots.forEach((slot, i) => { %>
       <%- include('partials/slot-row', { slot, number: i + 1 }) %>

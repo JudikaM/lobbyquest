@@ -2,11 +2,11 @@
   <span class="slot-number">Pilihan <span data-slot-number><%= number %></span></span>
   <label>
     Mulai
-    <input type="datetime-local" name="start" value="<%= slot.start %>">
+    <input type="datetime-local" name="start" value="<%= slot.start %>" min="<%= minDateTime %>">
   </label>
   <label>
     Selesai
-    <input type="datetime-local" name="end" value="<%= slot.end %>">
+    <input type="datetime-local" name="end" value="<%= slot.end %>" min="<%= minDateTime %>">
   </label>
   <button type="button" class="link-button" data-remove-slot hidden>Hapus</button>
 </div>
