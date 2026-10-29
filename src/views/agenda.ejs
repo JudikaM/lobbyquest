@@ -17,13 +17,69 @@
   <% } %>
 
   <h2>Pilihan waktu</h2>
+  <p class="note">
+    <%= participantCount %> orang sudah memilih. Semua waktu ditampilkan dalam <%= timezoneLabel %>.
+  </p>
   <ol class="time-options">
-    <% timeOptions.forEach((label) => { %>
-    <li><%= label %></li>
+    <% timeOptions.forEach((option) => { %>
+    <li class="<%= option.isTop ? 'is-top' : '' %>">
+      <span class="time-label"><%= option.label %></span>
+      <span class="vote-count">
+        <%= option.voters.length %> bisa<% if (option.isTop) { %> · paling banyak dipilih<% } %>
+      </span>
+      <% if (option.voters.length) { %>
+      <span class="voters"><%= option.voters.join(', ') %></span>
+      <% } %>
+    </li>
     <% }) %>
   </ol>
-  <p class="note">Semua waktu ditampilkan dalam <%= timezoneLabel %>.</p>
 </article>
+
+<section class="vote" id="suara">
+  <h2><%= participant ? 'Ubah pilihanmu' : 'Pilih waktu yang kamu bisa' %></h2>
+
+  <% if (voteSaved) { %>
+  <p class="success" role="status">Pilihanmu sudah disimpan.</p>
+  <% } %>
+
+  <% if (voteErrors.length) { %>
+  <div class="errors" role="alert">
+    <p>Pilihan belum disimpan:</p>
+    <ul>
+      <% voteErrors.forEach((error) => { %>
+      <li><%= error %></li>
+      <% }) %>
+    </ul>
+  </div>
+  <% } %>
+
+  <form class="form" method="post" action="/a/<%= agenda.slug %>/suara">
+    <label class="field">
+      Nama panggilan
+      <input type="text" name="name" value="<%= voteValues.name %>"
+        required maxlength="<%= nameMax %>" placeholder="Contoh: Budi">
+      <small>Nama dan pilihanmu terlihat oleh siapa pun yang memiliki tautan.</small>
+    </label>
+
+    <fieldset class="field">
+      <legend>Waktu yang kamu bisa</legend>
+      <small>Centang semua yang cocok. Kosongkan jika tidak ada yang bisa.</small>
+      <div class="vote-options">
+        <% timeOptions.forEach((option) => { %>
+        <label class="choice">
+          <input type="checkbox" name="option" value="<%= option.id %>"
+            <%= voteValues.optionIds.includes(option.id) ? 'checked' : '' %>>
+          <%= option.label %>
+        </label>
+        <% }) %>
+      </div>
+    </fieldset>
+
+    <button type="submit" class="primary-button">
+      <%= participant ? 'Perbarui pilihan' : 'Simpan pilihan' %>
+    </button>
+  </form>
+</section>
 
 <section class="share">
   <label class="field">

@@ -301,7 +301,8 @@ textarea {
 }
 
 .time-options {
-  padding-left: 1.25rem;
+  padding: 0;
+  list-style: none;
 }
 
 .time-options li {
@@ -314,4 +315,48 @@ textarea {
   border-radius: 0.75rem;
   background: var(--surface);
   margin-bottom: 2rem;
+}
+
+/* Voting */
+
+.time-options li {
+  display: grid;
+  gap: 0.125rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.time-options li.is-top {
+  border-color: var(--accent);
+}
+
+.vote-count {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.voters {
+  font-size: 0.875rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.vote {
+  margin-bottom: 1.5rem;
+}
+
+.vote-options {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.vote-options .choice {
+  align-items: flex-start;
+}
+
+.vote-options input {
+  margin-top: 0.3rem;
 }
