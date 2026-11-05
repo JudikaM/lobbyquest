@@ -2,6 +2,25 @@
   "name": "lobbyquest",
   "version": "0.1.0",
   "description": "Web open source untuk membuat janji mabar dan nongkrong bersama teman.",
+  "keywords": [
+    "scheduling",
+    "mabar",
+    "nongkrong",
+    "rsvp",
+    "express",
+    "sqlite",
+    "privacy"
+  ],
+  "homepage": "https://github.com/JudikaM/lobbyquest#readme",
+  "bugs": {
+    "url": "https://github.com/JudikaM/lobbyquest/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JudikaM/lobbyquest.git"
+  },
+  "license": "MIT",
+  "author": "JudikaM",
   "private": true,
   "main": "src/server.js",
   "scripts": {
