@@ -27,7 +27,8 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "test": "node --test",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "icons": "node scripts/build-icons.js"
   },
   "engines": {
     "node": ">=22"
@@ -42,7 +43,8 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.14.0",
-    "globals": "^17.14.0"
+    "globals": "^17.14.0",
+    "lucide-static": "^1.69.0"
   },
   "overrides": {
     "minimatch": "^11.0.4"
