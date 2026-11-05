@@ -20,6 +20,7 @@ test('production wajib APP_SECRET yang cukup panjang', () => {
 
 test('nilai env yang tidak valid ditolak', () => {
   assert.throws(() => loadConfig({ PORT: 'abc' }), /PORT/);
+  // eslint-disable-next-line no-script-url -- menguji bahwa skema berbahaya ditolak
   assert.throws(() => loadConfig({ PUBLIC_URL: 'javascript:alert(1)' }), /PUBLIC_URL/);
   assert.throws(() => loadConfig({ RETENTION_DAYS: '0' }), /RETENTION_DAYS/);
   assert.equal(loadConfig({ PUBLIC_URL: 'https://lq.example/path/' }).publicUrl, 'https://lq.example');
