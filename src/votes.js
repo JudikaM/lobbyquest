@@ -53,11 +53,11 @@ const saveVote = db.transaction((agenda, participant, { name, optionIds }) => {
   return token;
 });
 
-// Mengelompokkan nama pemilih per pilihan waktu.
+// Mengelompokkan pemilih ({ id, name }) per pilihan waktu.
 function tallyVotes(agenda) {
   const voters = new Map(agenda.timeOptions.map((option) => [option.id, []]));
   for (const row of selectVotes.all(agenda.id)) {
-    voters.get(row.time_option_id).push(row.name);
+    voters.get(row.time_option_id).push({ id: row.participant_id, name: row.name });
   }
   return voters;
 }

@@ -22,4 +22,17 @@ function fillClass(count, total) {
   return `fill-${Math.round((Math.min(count, total) / total) * 10)}`;
 }
 
-module.exports = { initial, avatarClass, fillClass };
+// Kelas lebar mark data dalam langkah 2% (w-0 … w-100); nilai bukan nol
+// minimal w-2 agar bar kecil tetap terlihat.
+function widthClass(count, total) {
+  if (!total || !count) return 'w-0';
+  const pct = Math.min(count, total) / total * 100;
+  return `w-${Math.max(2, Math.round(pct / 2) * 2)}`;
+}
+
+// Bobot flex untuk segmented bar (g-0 … g-50).
+function growClass(count) {
+  return `g-${Math.max(0, Math.min(50, Number(count) || 0))}`;
+}
+
+module.exports = { initial, avatarClass, fillClass, widthClass, growClass };

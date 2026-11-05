@@ -1,7 +1,10 @@
 const db = require('./db');
 const { validateName, upsertParticipant } = require('./participants');
 
-const RSVP_LABELS = { yes: 'Hadir', maybe: 'Mungkin', no: 'Tidak hadir' };
+// Label ready check. "AFK" dipakai untuk peserta yang belum menjawab.
+const RSVP_LABELS = { yes: 'Siap', maybe: 'Mungkin', no: 'Absen' };
+const RSVP_HINTS = { yes: 'Aku ikut', maybe: 'Belum pasti', no: 'Tidak ikut' };
+const RSVP_ICONS = { yes: 'circle-check', maybe: 'circle-help', no: 'circle-x', pending: 'hourglass' };
 
 function validateRsvp(body = {}) {
   const errors = [];
@@ -9,7 +12,7 @@ function validateRsvp(body = {}) {
   const status = typeof body.status === 'string' && Object.hasOwn(RSVP_LABELS, body.status)
     ? body.status
     : '';
-  if (!status) errors.push('Pilih salah satu: hadir, mungkin, atau tidak hadir.');
+  if (!status) errors.push('Pilih salah satu: siap, mungkin, atau absen.');
   return { values: { name, status }, errors };
 }
 
@@ -59,4 +62,4 @@ function rsvpSummary(agendaId) {
   return summary;
 }
 
-module.exports = { RSVP_LABELS, validateRsvp, saveRsvp, rsvpSummary };
+module.exports = { RSVP_LABELS, RSVP_HINTS, RSVP_ICONS, validateRsvp, saveRsvp, rsvpSummary };

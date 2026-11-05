@@ -1,0 +1,20 @@
+<%# Undangan: tautan + salin + berbagi. Parameter: inviteId (id input). %>
+<div class="invite">
+  <label class="sr-only" for="<%= inviteId %>">Tautan agenda</label>
+  <div class="invite-field">
+    <input class="input input-mono" id="<%= inviteId %>" type="text" value="<%= shareUrl %>" readonly data-select-on-focus>
+    <button type="button" class="btn btn-primary btn-icon" data-copy="#<%= inviteId %>"
+      data-copy-message="Tautan tersalin" data-copy-hint="Tempel di grup chat-mu."
+      data-tooltip="Salin tautan" data-tooltip-align="end" hidden>
+      <%- icon('copy', { className: 'icon-copy', label: 'Salin tautan' }) %><%- icon('check', { className: 'icon-copied' }) %>
+    </button>
+  </div>
+  <div class="share-buttons">
+    <button type="button" class="btn btn-brand" data-native-share
+      data-share-title="<%= agenda.title %>" data-share-text="<%= shareText %>" data-share-url="<%= shareUrl %>" hidden>
+      <%- icon('share-2') %>Bagikan…
+    </button>
+    <a class="btn btn-outline" href="<%= shareLinks.whatsapp %>" target="_blank" rel="noopener noreferrer"><%- icon('message-circle') %>WhatsApp</a>
+    <a class="btn btn-outline" href="<%= shareLinks.telegram %>" target="_blank" rel="noopener noreferrer"><%- icon('send') %>Telegram</a>
+  </div>
+</div>

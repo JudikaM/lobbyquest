@@ -4,11 +4,11 @@ const votes = require('./votes');
 const participants = require('./participants');
 const managers = require('./managers');
 const rsvp = require('./rsvp');
-const { initial, avatarClass, fillClass } = require('./presenters');
+const { initial, avatarClass, widthClass, growClass } = require('./presenters');
 const { shareText, shareLinks } = require('./share');
 const calendar = require('./calendar');
 const { iconNames } = require('./ui/icons');
-const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, formatDate, utcToLocalInput } = require('./time');
+const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, formatDate, utcToLocalInput, dateParts } = require('./time');
 const { readCookie, cookieOptions } = require('./security/cookies');
 const { publicOrigin } = require('./urls');
 const { expiryDate } = require('./retention');
@@ -142,6 +142,23 @@ function calendarEvent(agenda, url) {
   };
 }
 
+const AGENDA_TOASTS = {
+  baru: { title: 'Lobby siap!', description: 'Bagikan tautannya ke grup supaya teman bisa memilih waktu.' },
+  ditetapkan: { title: 'Jadwal dikunci', description: 'Teman-temanmu sekarang bisa menjawab ready check.' },
+  tersimpan: { title: 'Pilihanmu tersimpan', description: 'Kamu bisa mengubahnya kapan saja dari browser ini.' },
+  hadir: { title: 'Ready check tersimpan', description: 'Status kehadiranmu sudah terlihat di lobby.' },
+  kelola: { title: 'Kamu masuk sebagai pengelola', description: 'Panel pengelola ada di bagian bawah halaman.' },
+  keluar: { title: 'Namamu sudah dihapus', description: 'Nama, suara, dan konfirmasimu tidak tersimpan lagi.' },
+};
+
+// Toast dari parameter notifikasi (?baru=1, ?tersimpan=1, …). Tombol tutup
+// tanpa JavaScript kembali ke alamat agenda yang bersih.
+function agendaToast(req, agenda) {
+  const key = Object.keys(AGENDA_TOASTS).find((name) => req.query[name] === '1');
+  if (!key) return null;
+  return { ...AGENDA_TOASTS[key], closeHref: `/a/${agenda.slug}` };
+}
+
 function renderAgenda(req, res, agenda, {
   voteValues, voteErrors = [], manageErrors = [], rsvpValues, rsvpErrors = [],
 } = {}) {
@@ -152,7 +169,14 @@ function renderAgenda(req, res, agenda, {
   const voters = votes.tallyVotes(agenda);
   const members = participants.listParticipants(agenda.id);
   const count = members.length;
-  const topCount = Math.max(0, ...[...voters.values()].map((names) => names.length));
+  const topCount = Math.max(0, ...[...voters.values()].map((list) => list.length));
+  const summary = rsvp.rsvpSummary(agenda.id);
+
+  // Berapa pilihan waktu yang dicentang tiap peserta (untuk daftar lobby).
+  const picks = new Map();
+  for (const list of voters.values()) {
+    for (const voter of list) picks.set(voter.id, (picks.get(voter.id) || 0) + 1);
+  }
 
   // noindex hanya meminta mesin pencari tidak mengindeks; ini bukan kontrol
   // akses. Siapa pun yang tahu tautannya tetap bisa membuka halaman ini.
@@ -167,8 +191,12 @@ function renderAgenda(req, res, agenda, {
     : null;
   const shareUrl = `${origin}/a/${agenda.slug}`;
   const text = shareText(agenda, { finalLabel });
+  const rsvpOpen = agenda.status === 'scheduled' || agenda.status === 'done';
+  const yesCount = summary.yes.length;
+
   res.render('agenda', {
     title: agenda.title,
+    redesigned: true,
     noindex: true,
     // Preview tautan sengaja tidak memuat deskripsi agenda atau nama peserta.
     og: {
@@ -176,22 +204,32 @@ function renderAgenda(req, res, agenda, {
       url: shareUrl,
       description: previewDescription(agenda, finalLabel),
     },
+    toast: agendaToast(req, agenda),
     agenda,
     kindLabel: agendas.KINDS[agenda.kind],
     timezoneLabel: `${TIMEZONES[agenda.timezone]} (${agenda.timezone})`,
     status: agenda.status,
     statusLabel: agendas.STATUS_LABELS[agenda.status],
     finalLabel,
+    finalParts: agenda.finalOption
+      ? dateParts(agenda.finalOption.starts_at, agenda.finalOption.ends_at, agenda.timezone)
+      : null,
     timeOptions: agenda.timeOptions.map((option) => {
-      const names = voters.get(option.id);
+      const list = voters.get(option.id);
       return {
         id: option.id,
         startsAt: option.starts_at,
         endsAt: option.ends_at,
-        fill: fillClass(names.length, count),
+        parts: dateParts(option.starts_at, option.ends_at, agenda.timezone),
+        width: widthClass(list.length, count),
         label: formatRange(option.starts_at, option.ends_at, agenda.timezone),
-        voters: names,
-        isTop: topCount > 0 && names.length === topCount,
+        voters: list.map((voter) => voter.name),
+        avatars: list.slice(0, 4).map((voter) => ({
+          initial: initial(voter.name),
+          avatar: avatarClass(voter.id),
+        })),
+        moreVoters: Math.max(0, list.length - 4),
+        isTop: topCount > 0 && list.length === topCount,
         isFinal: option.id === agenda.final_option_id,
         canFinalize: Boolean(agendas.finalizableOption(agenda, String(option.id))),
       };
@@ -200,6 +238,8 @@ function renderAgenda(req, res, agenda, {
     party: members.map((member) => ({
       name: member.name,
       rsvp: member.rsvp,
+      state: rsvpOpen ? member.rsvp || 'pending' : 'voted',
+      picks: picks.get(member.id) || 0,
       initial: initial(member.name),
       avatar: avatarClass(member.id),
       isYou: Boolean(participant && participant.id === member.id),
@@ -223,21 +263,29 @@ function renderAgenda(req, res, agenda, {
     // tautan dibuka; halaman /kelola mengirimkannya lewat POST.
     managerUrl: manager ? `${origin}/a/${agenda.slug}/kelola#kode=${manager}` : null,
     managerCode: manager,
-    managerWelcome: req.query.kelola === '1',
-    finalSaved: req.query.ditetapkan === '1',
     manageErrors,
     capacity: agenda.capacity,
+    rsvpOpen,
     rsvpLabels: rsvp.RSVP_LABELS,
-    rsvpSummary: rsvp.rsvpSummary(agenda.id),
+    rsvpHints: rsvp.RSVP_HINTS,
+    rsvpIcons: rsvp.RSVP_ICONS,
+    rsvpSummary: summary,
+    rsvpGrow: {
+      yes: growClass(summary.yes.length),
+      maybe: growClass(summary.maybe.length),
+      no: growClass(summary.no.length),
+      pending: growClass(summary.pending.length),
+    },
+    capacityFull: Boolean(agenda.capacity && yesCount >= agenda.capacity),
+    capacitySlots: agenda.capacity
+      ? Array.from({ length: agenda.capacity }, (_, i) => i < yesCount)
+      : [],
     rsvpValues: rsvpValues || {
       name: participant ? participant.name : '',
       status: participant ? participant.rsvp || '' : '',
     },
     rsvpErrors,
-    rsvpSaved: req.query.hadir === '1',
-    leftAgenda: req.query.keluar === '1',
     justCreated: req.query.baru === '1',
-    voteSaved: req.query.tersimpan === '1',
     privacyNotice: PRIVACY_NOTICE,
     expiresLabel: formatDate(expiryDate(lastEnd, retentionDays), agenda.timezone),
   });
