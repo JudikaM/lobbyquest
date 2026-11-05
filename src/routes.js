@@ -141,6 +141,7 @@ function renderAgenda(req, res, agenda, {
     },
     rsvpErrors,
     rsvpSaved: req.query.hadir === '1',
+    leftAgenda: req.query.keluar === '1',
     justCreated: req.query.baru === '1',
     voteSaved: req.query.tersimpan === '1',
     privacyNotice: PRIVACY_NOTICE,
@@ -289,6 +290,15 @@ function createRouter(limiters) {
 
     if (newToken) setParticipantCookie(req, res, agenda.slug, newToken);
     res.redirect(303, `/a/${agenda.slug}?tersimpan=1#suara`);
+  });
+
+  // Peserta bisa menghapus nama, suara, dan konfirmasinya sendiri.
+  router.post('/a/:slug/keluar', limiters.participate, (req, res) => {
+    const { agenda } = req;
+    const participant = findCurrentParticipant(req, agenda);
+    if (participant) participants.deleteParticipant(participant);
+    res.clearCookie(participants.COOKIE, cookieOptions(req, { path: `/a/${agenda.slug}` }));
+    res.redirect(303, `/a/${agenda.slug}?keluar=1`);
   });
 
   router.post('/a/:slug/hadir', limiters.participate, (req, res) => {

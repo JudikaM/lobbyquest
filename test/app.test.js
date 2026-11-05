@@ -83,3 +83,28 @@ test('voting menolak pilihan waktu milik agenda lain', async () => {
   const response = await browser.post(`${agendaPath}/suara`, [['name', 'Ani'], ['option', '999999']]);
   assert.equal(response.status, 422);
 });
+
+test('peserta bisa menghapus datanya sendiri, tidak data orang lain', async () => {
+  const owner = new Browser(server.baseUrl);
+  const agendaPath = await createAgenda(owner);
+  const page = await owner.get(agendaPath);
+  const optionId = /name="option" value="(\d+)"/.exec(page.text)[1];
+
+  const ani = new Browser(server.baseUrl);
+  const budi = new Browser(server.baseUrl);
+  await ani.post(`${agendaPath}/suara`, [['name', 'Ani'], ['option', optionId]]);
+  await budi.post(`${agendaPath}/suara`, [['name', 'Budi'], ['option', optionId]]);
+  assert.match((await ani.get(agendaPath)).text, /Hapus namaku/);
+
+  const response = await ani.post(`${agendaPath}/keluar`);
+  assert.equal(response.status, 303);
+  assert.ok(!ani.cookies.has('lq_peserta'));
+  const after = await owner.get(agendaPath);
+  assert.match(after.text, /1 orang sudah memilih/);
+  assert.match(after.text, /Budi/);
+  assert.doesNotMatch(after.text, /Ani/);
+
+  // Tanpa cookie peserta: tidak ada yang terhapus.
+  await new Browser(server.baseUrl).post(`${agendaPath}/keluar`);
+  assert.match((await owner.get(agendaPath)).text, /1 orang sudah memilih/);
+});
