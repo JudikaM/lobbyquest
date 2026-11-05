@@ -23,7 +23,7 @@ test('respons memuat security headers dan CSP ketat', async () => {
 });
 
 test('file statis juga mendapat security headers', async () => {
-  const response = await new Browser(server.baseUrl).get('/style.css');
+  const response = await new Browser(server.baseUrl).get('/app.css');
   assert.equal(response.status, 200);
   assert.ok(response.headers.get('content-security-policy'));
 });

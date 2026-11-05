@@ -1883,7 +1883,7 @@
 }
 
 /* Lebar mark data dalam langkah 2% dan bobot segmen 0–50. Dibuat oleh
-   presenters.js (fillClass/growClass) karena CSP melarang style="". */
+   presenters.js (widthClass/growClass) karena CSP melarang style="". */
 @layer components {
   .w-0 { width: 0%; }
   .w-2 { width: 2%; }

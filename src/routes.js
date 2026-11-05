@@ -196,7 +196,6 @@ function renderAgenda(req, res, agenda, {
 
   res.render('agenda', {
     title: agenda.title,
-    redesigned: true,
     noindex: true,
     // Preview tautan sengaja tidak memuat deskripsi agenda atau nama peserta.
     og: {
