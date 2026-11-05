@@ -8,6 +8,9 @@ const { requireFormBody } = require('./security/body');
 const { createLimiters } = require('./security/rate-limit');
 const { publicOrigin } = require('./urls');
 const { icon } = require('./ui/icons');
+const { readCookie } = require('./security/cookies');
+
+const THEME_COOKIE = 'lq_tema';
 
 // Membuat aplikasi Express tanpa langsung mendengarkan port, sehingga bisa
 // dipakai oleh server maupun test. `rateLimits` menimpa batas bawaan
@@ -35,9 +38,13 @@ function createApp({ config = loadConfig(), rateLimits } = {}) {
   app.use(requireFormBody);
   app.use(express.urlencoded({ extended: false, limit: '20kb' }));
   app.use(csrfProtection(config));
-  // Origin publik untuk URL absolut di template (misalnya og:image).
+  // Origin publik untuk URL absolut di template (misalnya og:image), dan
+  // tema pilihan pengguna (cookie preferensi, bukan data pribadi) agar
+  // halaman langsung dirender dengan tema yang benar tanpa kedipan.
   app.use((req, res, next) => {
     res.locals.origin = publicOrigin(req);
+    const theme = readCookie(req, THEME_COOKIE);
+    res.locals.theme = theme === 'light' || theme === 'dark' ? theme : null;
     next();
   });
   app.use(createRouter(createLimiters(rateLimits)));
