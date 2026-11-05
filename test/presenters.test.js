@@ -17,3 +17,14 @@ test('avatarClass dan fillClass menghasilkan class tetap', () => {
   assert.equal(fillClass(3, 3), 'fill-10');
   assert.equal(fillClass(5, 3), 'fill-10');
 });
+
+test('widthClass dan growClass menghasilkan kelas yang ada di CSS', () => {
+  const { widthClass, growClass } = require('../src/presenters');
+  assert.equal(widthClass(0, 5), 'w-0');
+  assert.equal(widthClass(1, 100), 'w-2');
+  assert.equal(widthClass(5, 6), 'w-84');
+  assert.equal(widthClass(9, 6), 'w-100');
+  assert.equal(growClass(3), 'g-3');
+  assert.equal(growClass(99), 'g-50');
+  assert.equal(growClass(-1), 'g-0');
+});

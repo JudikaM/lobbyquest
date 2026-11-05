@@ -17,8 +17,9 @@ async function scheduledAgenda() {
   return { owner, agendaPath, optionIds };
 }
 
+// Jumlah per status dari stat tile ready check (data-count).
 function summaryCount(text, key) {
-  const match = new RegExp(`rsvp-${key}">\\s*<span class="rsvp-count">(\\d+)`).exec(text);
+  const match = new RegExp(`stat-${key}" data-count="(\\d+)"`).exec(text);
   return match ? Number(match[1]) : null;
 }
 

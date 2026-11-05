@@ -94,7 +94,35 @@ function formatRange(startsAt, endsAt, timeZone) {
   return `${date.format(start)}, ${time.format(start)} – ${date.format(end)}, ${time.format(end)} ${zone}`;
 }
 
+function clean(text) {
+  return text.replace(/\.$/, '');
+}
+
+// Komponen tampilan untuk petak tanggal dan baris waktu, misalnya
+// { weekday: 'Sab', day: '7', month: 'Nov', range: '19.00–22.00',
+//   date: 'Sabtu, 7 November 2026', zone: 'WIB', crossesDay: false }.
+function dateParts(startsAt, endsAt, timeZone) {
+  const start = new Date(startsAt);
+  const end = new Date(endsAt);
+  const fmt = (options) => new Intl.DateTimeFormat('id-ID', { timeZone, ...options });
+  const longDate = fmt({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const time = fmt({ hour: '2-digit', minute: '2-digit' });
+  const crossesDay = longDate.format(start) !== longDate.format(end);
+  return {
+    weekday: clean(fmt({ weekday: 'short' }).format(start)),
+    day: fmt({ day: 'numeric' }).format(start),
+    month: clean(fmt({ month: 'short' }).format(start)),
+    range: `${time.format(start)}–${time.format(end)}`,
+    date: crossesDay
+      ? `${longDate.format(start)} – ${fmt({ weekday: 'long', day: 'numeric', month: 'long' }).format(end)}`
+      : longDate.format(start),
+    zone: TIMEZONES[timeZone] || timeZone,
+    crossesDay,
+  };
+}
+
 module.exports = {
+  dateParts,
   TIMEZONES,
   DEFAULT_TIMEZONE,
   localToUtc,

@@ -24,3 +24,17 @@ test('formatRange menulis rentang pada hari yang sama secara ringkas', () => {
   const text = formatRange('2026-11-01T12:00:00.000Z', '2026-11-01T15:00:00.000Z', 'Asia/Jakarta');
   assert.match(text, /Minggu, 1 November 2026, 19\.00–22\.00 WIB/);
 });
+
+test('dateParts menyiapkan komponen petak tanggal', () => {
+  const { dateParts } = require('../src/time');
+  const parts = dateParts('2026-11-07T12:00:00.000Z', '2026-11-07T15:00:00.000Z', 'Asia/Jakarta');
+  assert.equal(parts.weekday, 'Sab');
+  assert.equal(parts.day, '7');
+  assert.equal(parts.month, 'Nov');
+  assert.equal(parts.range, '19.00–22.00');
+  assert.equal(parts.date, 'Sabtu, 7 November 2026');
+  assert.equal(parts.zone, 'WIB');
+  const late = dateParts('2026-11-07T16:00:00.000Z', '2026-11-07T18:00:00.000Z', 'Asia/Jakarta');
+  assert.equal(late.crossesDay, true);
+  assert.match(late.date, /Sabtu, 7 November 2026 – Minggu, 8 November/);
+});
