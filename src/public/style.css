@@ -1008,6 +1008,37 @@ input[type="radio"] {
   margin: 0;
 }
 
+.countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.6rem 0 0;
+  padding: 0.25rem 0.7rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--on-accent);
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+.countdown::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.countdown.is-live {
+  color: #fff;
+  background: var(--ready);
+}
+
+.countdown[hidden] {
+  display: none;
+}
+
 .local-time {
   display: block;
   margin-top: 0.15rem;
