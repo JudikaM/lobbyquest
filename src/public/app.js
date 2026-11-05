@@ -323,3 +323,17 @@ if (themeMenu) {
     });
   }
 }
+
+// ---------- Tampilkan/sembunyikan isian rahasia ----------
+
+for (const toggle of document.querySelectorAll('[data-password-toggle]')) {
+  const input = document.getElementById(toggle.dataset.passwordToggle);
+  if (!input) continue;
+  toggle.hidden = false;
+  toggle.addEventListener('click', () => {
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    toggle.setAttribute('aria-pressed', String(show));
+    toggle.dataset.tooltip = show ? 'Sembunyikan kode' : 'Tampilkan kode';
+  });
+}

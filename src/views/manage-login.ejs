@@ -1,29 +1,39 @@
-<%- include('partials/header') %>
+<%- include('partials/header', { redesigned: true }) %>
 
-<section class="panel narrow">
-  <p class="eyebrow">Akses pengelola</p>
-  <h1>Masuk sebagai pengelola</h1>
-  <p>Agenda: <strong><%= agenda.title %></strong></p>
-  <p class="hint">
-    Masukkan kode pengelola yang kamu simpan saat membuat agenda. Setelah itu,
-    browser ini bisa menetapkan waktu dan mengelola agenda.
-  </p>
+<section class="container auth-page" aria-labelledby="kelola-judul">
+  <div class="card auth-card">
+    <div class="card-content stack stack-lg">
+      <div class="auth-head">
+        <span class="auth-icon"><%- icon('key-round', { size: 24 }) %></span>
+        <p class="kicker">Akses pengelola</p>
+        <h1 class="auth-title" id="kelola-judul">Masuk sebagai pengelola</h1>
+        <p class="hint">Agenda: <strong class="auth-agenda"><%= agenda.title %></strong></p>
+      </div>
 
-  <% if (error) { %>
-  <div class="flash flash-error" role="alert"><p><%= error %></p></div>
-  <% } %>
+      <% if (error) { %>
+      <%- include('partials/ui/alert', { alert: { variant: 'destructive', title: error, text: 'Periksa lagi kode yang kamu salin saat membuat agenda.', focus: true } }) %>
+      <% } %>
 
-  <form class="form" method="post" action="/a/<%= agenda.slug %>/kelola" data-manage-login>
-    <%- include('partials/csrf') %>
-    <div class="field">
-      <label for="kode">Kode pengelola</label>
-      <input id="kode" type="password" name="kode" required autocomplete="off" spellcheck="false"
-        maxlength="64" data-manage-code>
+      <form class="stack" method="post" action="/a/<%= agenda.slug %>/kelola" data-manage-login>
+        <%- include('partials/csrf') %>
+        <div class="field">
+          <label class="label" for="kode">Kode pengelola</label>
+          <div class="invite-field">
+            <input class="input input-mono" id="kode" type="password" name="kode" required autocomplete="off"
+              spellcheck="false" maxlength="64" aria-describedby="kode-hint" data-manage-code>
+            <button type="button" class="btn btn-outline btn-icon" data-password-toggle="kode" aria-pressed="false" hidden
+              data-tooltip="Tampilkan kode" data-tooltip-align="end">
+              <%- icon('eye', { className: 'icon-show', label: 'Tampilkan kode' }) %><%- icon('eye-off', { className: 'icon-hide', label: 'Sembunyikan kode' }) %>
+            </button>
+          </div>
+          <p class="hint" id="kode-hint">Kode ada di panel pengelola browser yang dipakai saat membuat agenda, atau di tautan pengelola yang kamu simpan.</p>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg btn-block"><%- icon('log-in') %>Masuk</button>
+      </form>
+
+      <a class="btn btn-ghost" href="/a/<%= agenda.slug %>"><%- icon('arrow-left') %>Kembali ke agenda</a>
     </div>
-    <button type="submit" class="button button-primary">Masuk</button>
-  </form>
-
-  <p><a href="/a/<%= agenda.slug %>">Kembali ke agenda</a></p>
+  </div>
 </section>
 
 <script type="module" src="/kelola.js"></script>
