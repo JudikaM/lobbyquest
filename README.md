@@ -190,5 +190,5 @@ perubahan ada di [CHANGELOG.md](CHANGELOG.md).
 
 ## Lisensi
 
-[MIT](LICENSE). Font Chakra Petch disertakan di bawah
-[SIL Open Font License 1.1](src/public/fonts/OFL-chakra-petch.txt).
+[MIT](LICENSE). Font Geist dan Geist Mono disertakan di bawah
+[SIL Open Font License 1.1](src/public/fonts/OFL-geist.txt).
