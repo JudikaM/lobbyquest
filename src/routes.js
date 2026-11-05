@@ -154,7 +154,7 @@ function createRouter(limiters) {
   const router = express.Router();
 
   router.get('/', (req, res) => {
-    res.render('home', { title: 'Beranda' });
+    res.render('home', { title: 'Beranda', deleted: req.query.dihapus === '1' });
   });
 
   router.get('/health', (req, res) => {
@@ -244,6 +244,21 @@ function createRouter(limiters) {
     }
     agendas.setFinalOption(agenda, null);
     res.redirect(303, `/a/${agenda.slug}#suara`);
+  });
+
+  router.post('/a/:slug/hapus', limiters.manage, requireManager, (req, res) => {
+    const { agenda } = req;
+    if (req.body.konfirmasi !== 'ya') {
+      res.status(422);
+      return renderAgenda(req, res, agenda, {
+        manageErrors: ['Centang konfirmasi untuk menghapus agenda.'],
+      });
+    }
+    agendas.deleteAgenda(agenda);
+    const scope = cookieOptions(req, { path: `/a/${agenda.slug}` });
+    res.clearCookie(managers.COOKIE, scope);
+    res.clearCookie(participants.COOKIE, scope);
+    res.redirect(303, '/?dihapus=1');
   });
 
   router.post('/a/:slug/suara', limiters.participate, (req, res) => {

@@ -231,6 +231,22 @@
     </label>
   </details>
 
+  <details class="danger-zone">
+    <summary>Hapus agenda</summary>
+    <form class="form" method="post" action="/a/<%= agenda.slug %>/hapus">
+      <%- include('partials/csrf') %>
+      <p class="note">
+        Agenda, pilihan waktu, suara, dan konfirmasi kehadiran akan dihapus
+        permanen. Tautan agenda tidak bisa dibuka lagi.
+      </p>
+      <label class="choice">
+        <input type="checkbox" name="konfirmasi" value="ya" required>
+        Ya, hapus agenda ini secara permanen
+      </label>
+      <button type="submit" class="danger-button">Hapus agenda</button>
+    </form>
+  </details>
+
   <form method="post" action="/a/<%= agenda.slug %>/kelola/keluar">
     <%- include('partials/csrf') %>
     <button type="submit" class="link-button">Lupakan akses pengelola di browser ini</button>

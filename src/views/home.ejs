@@ -1,5 +1,9 @@
 <%- include('partials/header') %>
 
+<% if (deleted) { %>
+<p class="success" role="status">Agenda sudah dihapus permanen.</p>
+<% } %>
+
 <section class="hero">
   <h1>LobbyQuest</h1>
   <p class="lead">

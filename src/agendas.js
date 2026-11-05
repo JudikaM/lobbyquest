@@ -211,6 +211,13 @@ const setFinalOption = db.transaction((agenda, optionId) => {
   resetRsvps.run(agenda.id);
 });
 
+const deleteAgendaStatement = db.prepare('DELETE FROM agendas WHERE id = ?');
+
+// Menghapus agenda beserta pilihan waktu, peserta, dan suaranya (cascade).
+function deleteAgenda(agenda) {
+  deleteAgendaStatement.run(agenda.id);
+}
+
 module.exports = {
   KINDS,
   LIMITS,
@@ -223,4 +230,5 @@ module.exports = {
   findAgendaBySlug,
   finalizableOption,
   setFinalOption,
+  deleteAgenda,
 };
