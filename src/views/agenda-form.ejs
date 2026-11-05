@@ -60,6 +60,14 @@
         aria-describedby="location-hint" autocomplete="off">
       <small id="location-hint">Cukup lokasi umum. Jangan tulis alamat rumah.</small>
     </div>
+
+    <div class="field">
+      <label for="capacity">Kuota party <span class="optional">(opsional)</span></label>
+      <input id="capacity" type="number" name="capacity" value="<%= values.capacity %>"
+        min="<%= limits.capacityMin %>" max="<%= limits.capacityMax %>" step="1" inputmode="numeric"
+        placeholder="Contoh: 5" aria-describedby="capacity-hint" class="input-short">
+      <small id="capacity-hint">Batas orang yang bisa konfirmasi hadir, misalnya 5 untuk satu squad. Kosongkan jika bebas.</small>
+    </div>
   </section>
 
   <section class="panel">

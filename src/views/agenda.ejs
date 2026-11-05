@@ -27,7 +27,7 @@
       <div><dt>Lokasi/platform</dt><dd><%= agenda.location %></dd></div>
       <% } %>
       <div><dt>Zona waktu</dt><dd><%= timezoneLabel %></dd></div>
-      <div><dt>Party</dt><dd><%= participantCount %> orang</dd></div>
+      <div><dt>Party</dt><dd><%= participantCount %> orang<% if (capacity) { %> · kuota hadir <%= capacity %><% } %></dd></div>
     </dl>
 
     <ol class="status-steps" aria-label="Tahapan agenda">
@@ -62,6 +62,12 @@
   <% if (status === 'scheduled' || status === 'done') { %>
   <section class="panel rsvp" id="hadir" aria-labelledby="hadir-judul">
     <h2 id="hadir-judul" class="panel-title">Ready check <span class="panel-subtitle">Konfirmasi kehadiran</span></h2>
+    <% if (capacity) { %>
+    <p class="party-slots<%= rsvpSummary.yes.length >= capacity ? ' is-full' : '' %>">
+      <span class="slot-pips" aria-hidden="true"><% for (let i = 0; i < capacity; i++) { %><span class="pip<%= i < rsvpSummary.yes.length ? ' is-filled' : '' %>"></span><% } %></span>
+      <span><strong><%= Math.min(rsvpSummary.yes.length, capacity) %>/<%= capacity %></strong> slot terisi<%= rsvpSummary.yes.length >= capacity ? ' · party penuh' : '' %></span>
+    </p>
+    <% } %>
 
     <ul class="rsvp-summary">
       <% Object.entries(rsvpLabels).forEach(([key, label]) => { %>
