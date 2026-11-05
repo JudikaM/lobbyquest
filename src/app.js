@@ -17,6 +17,9 @@ function createApp({ config = loadConfig(), rateLimits } = {}) {
   app.set('views', path.join(__dirname, 'views'));
   app.set('config', config);
   app.disable('x-powered-by');
+  // Menentukan dari mana req.ip dan req.secure dibaca saat berada di
+  // belakang reverse proxy. Bawaan: tidak memercayai X-Forwarded-*.
+  app.set('trust proxy', config.trustProxy);
 
   app.use(securityHeaders(config));
   app.use(express.static(path.join(__dirname, 'public')));
