@@ -6,6 +6,7 @@ const { securityHeaders } = require('./security/headers');
 const { csrfProtection } = require('./security/csrf');
 const { requireFormBody } = require('./security/body');
 const { createLimiters } = require('./security/rate-limit');
+const { publicOrigin } = require('./urls');
 
 // Membuat aplikasi Express tanpa langsung mendengarkan port, sehingga bisa
 // dipakai oleh server maupun test. `rateLimits` menimpa batas bawaan
@@ -31,6 +32,11 @@ function createApp({ config = loadConfig(), rateLimits } = {}) {
   app.use(requireFormBody);
   app.use(express.urlencoded({ extended: false, limit: '20kb' }));
   app.use(csrfProtection(config));
+  // Origin publik untuk URL absolut di template (misalnya og:image).
+  app.use((req, res, next) => {
+    res.locals.origin = publicOrigin(req);
+    next();
+  });
   app.use(createRouter(createLimiters(rateLimits)));
 
   app.use((req, res) => {

@@ -79,6 +79,17 @@ function participantLimitMessage() {
   return `Agenda ini sudah mencapai batas ${participants.MAX_PARTICIPANTS} peserta.`;
 }
 
+function previewDescription(agenda, finalLabel) {
+  const kind = agendas.KINDS[agenda.kind];
+  if (agenda.status === 'scheduled' && finalLabel) {
+    return `${kind} · ${finalLabel}. Konfirmasi kehadiranmu di LobbyQuest.`;
+  }
+  if (agenda.status === 'voting') {
+    return `${kind} · ${agenda.timeOptions.length} pilihan waktu. Pilih waktu yang kamu bisa di LobbyQuest.`;
+  }
+  return `${kind} · ${agendas.STATUS_LABELS[agenda.status]}.`;
+}
+
 function calendarEvent(agenda, url) {
   return {
     slug: agenda.slug,
@@ -119,6 +130,12 @@ function renderAgenda(req, res, agenda, {
   res.render('agenda', {
     title: agenda.title,
     noindex: true,
+    // Preview tautan sengaja tidak memuat deskripsi agenda atau nama peserta.
+    og: {
+      title: agenda.title,
+      url: shareUrl,
+      description: previewDescription(agenda, finalLabel),
+    },
     agenda,
     kindLabel: agendas.KINDS[agenda.kind],
     timezoneLabel: `${TIMEZONES[agenda.timezone]} (${agenda.timezone})`,
