@@ -3,6 +3,7 @@ const agendas = require('./agendas');
 const votes = require('./votes');
 const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, utcToLocalInput } = require('./time');
 const { readCookie, cookieOptions } = require('./security/cookies');
+const { publicOrigin } = require('./urls');
 
 const PRIVACY_NOTICE =
   'Siapa pun yang memiliki tautan dapat melihat agenda ini. ' +
@@ -64,7 +65,7 @@ function renderAgenda(req, res, agenda, { voteValues, voteErrors = [] } = {}) {
     },
     voteErrors,
     nameMax: votes.NAME_MAX,
-    shareUrl: `${req.protocol}://${req.get('host')}/a/${agenda.slug}`,
+    shareUrl: `${publicOrigin(req)}/a/${agenda.slug}`,
     justCreated: req.query.baru === '1',
     voteSaved: req.query.tersimpan === '1',
     privacyNotice: PRIVACY_NOTICE,
