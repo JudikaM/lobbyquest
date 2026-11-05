@@ -96,3 +96,27 @@ test('route pengelola untuk agenda yang tidak ada menghasilkan 404', async () =>
   const browser = new Browser(server.baseUrl);
   assert.equal((await browser.get('/a/AAAAAAAAAAAAAAAA/kelola')).status, 404);
 });
+
+test('pengelola menghapus agenda beserta seluruh datanya', async () => {
+  const owner = new Browser(server.baseUrl);
+  const agendaPath = await create(owner);
+  const page = await owner.get(agendaPath);
+  const optionId = /name="option" value="(\d+)"/.exec(page.text)[1];
+  const friend = new Browser(server.baseUrl);
+  await friend.post(`${agendaPath}/suara`, [['name', 'Ani'], ['option', optionId]]);
+
+  // Peserta biasa tidak bisa menghapus.
+  assert.equal((await friend.post(`${agendaPath}/hapus`, [['konfirmasi', 'ya']])).status, 403);
+  // Tanpa konfirmasi ditolak.
+  assert.equal((await owner.post(`${agendaPath}/hapus`)).status, 422);
+
+  const slug = agendaPath.split('/').pop();
+  const id = db.prepare('SELECT id FROM agendas WHERE slug = ?').pluck().get(slug);
+  const response = await owner.post(`${agendaPath}/hapus`, [['konfirmasi', 'ya']]);
+  assert.equal(response.status, 303);
+  assert.equal(response.headers.get('location'), '/?dihapus=1');
+  assert.ok(!owner.cookies.has('lq_kelola'));
+  assert.equal((await owner.get(agendaPath)).status, 404);
+  assert.equal(db.prepare('SELECT count(*) FROM participants WHERE agenda_id = ?').pluck().get(id), 0);
+  assert.equal(db.prepare('SELECT count(*) FROM time_options WHERE agenda_id = ?').pluck().get(id), 0);
+});
