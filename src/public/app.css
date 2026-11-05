@@ -666,17 +666,12 @@
   }
 
   /* Ukuran kecil tetap punya area sentuh 44px lewat ::after. */
+  /* Secara visual lebih ringkas (padding lebih tipis), tapi tingginya tetap
+     penuh 44px: ekstensi area klik lewat pseudo-elemen tidak diandalkan
+     karena bisa tertutup elemen tetangga di beberapa tata letak. */
   .btn-sm {
-    --btn-h: var(--control-sm);
     padding: 0 var(--space-3);
     font-size: var(--text-sm);
-  }
-
-  .btn-sm::after,
-  .btn-icon.btn-sm::after {
-    content: "";
-    position: absolute;
-    inset: calc((var(--control-sm) - var(--control)) / 2);
   }
 
   .btn-lg {
@@ -1457,7 +1452,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-1-5);
-    min-height: 2.5rem;
+    min-height: var(--control);
     padding: 0 var(--space-3);
     font-size: var(--text-sm);
     font-weight: 550;
@@ -2018,9 +2013,12 @@
   .skip-link {
     position: absolute;
     z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control);
     top: var(--space-2);
     left: var(--space-2);
-    padding: var(--space-2) var(--space-4);
+    padding: 0 var(--space-4);
     font-weight: 600;
     color: var(--primary-foreground);
     background: var(--primary);
