@@ -66,7 +66,6 @@ function renderAgenda(req, res, agenda, { voteValues, voteErrors = [] } = {}) {
   // noindex hanya meminta mesin pencari tidak mengindeks; ini bukan kontrol
   // akses. Siapa pun yang tahu tautannya tetap bisa membuka halaman ini.
   res.set('X-Robots-Tag', 'noindex, nofollow');
-  res.set('Referrer-Policy', 'no-referrer');
   res.render('agenda', {
     title: agenda.title,
     noindex: true,
@@ -102,7 +101,8 @@ router.get('/', (req, res) => {
 });
 
 router.get('/health', (req, res) => {
-  res.json({ status: 'ok', uptime: process.uptime() });
+  // Sengaja minim: tidak membocorkan uptime, versi, atau detail server.
+  res.json({ status: 'ok' });
 });
 
 router.get('/agenda/baru', (req, res) => {
