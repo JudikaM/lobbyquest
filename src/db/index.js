@@ -14,6 +14,9 @@ if (file !== ':memory:') {
 const db = new Database(file);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
+// Data yang dihapus (misalnya agenda kedaluwarsa) ditimpa nol di file
+// database, bukan sekadar ditandai kosong.
+db.pragma('secure_delete = ON');
 
 // Menjalankan file .sql di folder migrations yang belum pernah dijalankan,
 // berurutan menurut nama file. Tiap migrasi berjalan dalam satu transaksi.

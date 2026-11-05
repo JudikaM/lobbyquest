@@ -1,9 +1,10 @@
 const express = require('express');
 const agendas = require('./agendas');
 const votes = require('./votes');
-const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, utcToLocalInput } = require('./time');
+const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, formatDate, utcToLocalInput } = require('./time');
 const { readCookie, cookieOptions } = require('./security/cookies');
 const { publicOrigin } = require('./urls');
+const { expiryDate } = require('./retention');
 
 const PRIVACY_NOTICE =
   'Siapa pun yang memiliki tautan dapat melihat agenda ini. ' +
@@ -42,6 +43,11 @@ function renderAgenda(req, res, agenda, { voteValues, voteErrors = [] } = {}) {
   // noindex hanya meminta mesin pencari tidak mengindeks; ini bukan kontrol
   // akses. Siapa pun yang tahu tautannya tetap bisa membuka halaman ini.
   res.set('X-Robots-Tag', 'noindex, nofollow');
+  const lastEnd = agenda.timeOptions.reduce(
+    (max, option) => (option.ends_at > max ? option.ends_at : max),
+    agenda.created_at
+  );
+  const { retentionDays } = req.app.get('config');
   res.render('agenda', {
     title: agenda.title,
     noindex: true,
@@ -69,6 +75,7 @@ function renderAgenda(req, res, agenda, { voteValues, voteErrors = [] } = {}) {
     justCreated: req.query.baru === '1',
     voteSaved: req.query.tersimpan === '1',
     privacyNotice: PRIVACY_NOTICE,
+    expiresLabel: formatDate(expiryDate(lastEnd, retentionDays), agenda.timezone),
   });
 }
 
