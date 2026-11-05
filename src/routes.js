@@ -2,6 +2,7 @@ const express = require('express');
 const agendas = require('./agendas');
 const votes = require('./votes');
 const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, utcToLocalInput } = require('./time');
+const { readCookie, cookieOptions } = require('./security/cookies');
 
 const router = express.Router();
 
@@ -30,32 +31,8 @@ function renderForm(res, values, errors = []) {
   });
 }
 
-// Ambil satu cookie dari header tanpa dependency tambahan.
-function readCookie(req, name) {
-  for (const part of (req.headers.cookie || '').split(';')) {
-    const index = part.indexOf('=');
-    if (index > 0 && part.slice(0, index).trim() === name) {
-      return part.slice(index + 1).trim();
-    }
-  }
-  return null;
-}
-
 function findCurrentParticipant(req, agenda) {
   return votes.findParticipant(agenda.id, readCookie(req, PARTICIPANT_COOKIE));
-}
-
-// Format yang diterima oleh POST form. req.is() bernilai null jika request
-// tidak punya body (diperlakukan sebagai form kosong) dan false jika body
-// memakai format lain.
-function rejectUnsupportedBody(req, res) {
-  if (req.is('application/x-www-form-urlencoded') !== false) return false;
-
-  res.status(415).render('error', {
-    title: 'Format tidak didukung',
-    message: 'Kirim data melalui form yang tersedia di halaman.',
-  });
-  return true;
 }
 
 function renderAgenda(req, res, agenda, { voteValues, voteErrors = [] } = {}) {
@@ -118,8 +95,6 @@ router.get('/agenda/baru', (req, res) => {
 });
 
 router.post('/agenda', (req, res) => {
-  if (rejectUnsupportedBody(req, res)) return;
-
   const { values, errors, agenda } = agendas.validateAgenda(req.body);
   if (errors.length) {
     res.status(422);
@@ -140,8 +115,6 @@ router.get('/a/:slug', (req, res, next) => {
 router.post('/a/:slug/suara', (req, res, next) => {
   const agenda = agendas.findAgendaBySlug(req.params.slug);
   if (!agenda) return next();
-  if (rejectUnsupportedBody(req, res)) return;
-
   const { values, errors } = votes.validateVote(req.body, agenda);
   if (errors.length) {
     res.status(422);
@@ -163,13 +136,10 @@ router.post('/a/:slug/suara', (req, res, next) => {
   if (newToken) {
     // Cookie hanya dikirim ke halaman agenda ini dan tidak bisa dibaca
     // JavaScript. SameSite=Lax mencegah situs lain mengubah suara peserta.
-    res.cookie(PARTICIPANT_COOKIE, newToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: req.secure,
+    res.cookie(PARTICIPANT_COOKIE, newToken, cookieOptions(req, {
       path: `/a/${agenda.slug}`,
       maxAge: 180 * 24 * 60 * 60 * 1000,
-    });
+    }));
   }
   res.redirect(303, `/a/${agenda.slug}?tersimpan=1#suara`);
 });

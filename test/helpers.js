@@ -24,6 +24,7 @@ class Browser {
   constructor(baseUrl) {
     this.baseUrl = baseUrl;
     this.cookies = new Map();
+    this.csrfToken = null;
   }
 
   cookieHeader(pathname) {
@@ -64,6 +65,8 @@ class Browser {
     const response = await fetch(url, init);
     this.storeCookies(response);
     const text = await response.text();
+    const token = /name="_csrf" value="([^"]+)"/.exec(text);
+    if (token) this.csrfToken = token[1];
     return { status: response.status, headers: response.headers, text };
   }
 
@@ -71,8 +74,15 @@ class Browser {
     return this.request(pathname, options);
   }
 
-  post(pathname, form, options = {}) {
-    return this.request(pathname, { ...options, method: 'POST', form });
+  // Mengirim form seperti browser sungguhan: token CSRF diambil dari halaman
+  // terakhir yang dibuka. `csrf: false` untuk menguji request tanpa token.
+  async post(pathname, form = [], { csrf = true, ...options } = {}) {
+    const fields = Array.isArray(form) ? [...form] : Object.entries(form);
+    if (csrf && !fields.some(([name]) => name === '_csrf')) {
+      if (!this.csrfToken) await this.get('/agenda/baru');
+      fields.push(['_csrf', this.csrfToken]);
+    }
+    return this.request(pathname, { ...options, method: 'POST', form: fields });
   }
 }
 

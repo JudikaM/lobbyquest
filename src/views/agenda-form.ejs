@@ -16,6 +16,7 @@
 <% } %>
 
 <form class="form" method="post" action="/agenda">
+  <%- include('partials/csrf') %>
   <label class="field">
     Judul
     <input type="text" name="title" value="<%= values.title %>"
