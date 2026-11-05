@@ -40,6 +40,12 @@ uploads/
 npm-debug.log*
 *.log
 
+# Hasil build, coverage & cache
+dist/
+build/
+coverage/
+.cache/
+
 # Editor & sistem operasi
 .vscode/
 .idea/
