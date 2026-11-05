@@ -72,3 +72,30 @@ test('di production cookie CSRF memakai awalan __Host- dan Secure', async () => 
     await prod.close();
   }
 });
+
+test('POST dari halaman sendiri dengan Origin "null" diterima (Referrer-Policy no-referrer)', async () => {
+  const browser = new Browser(server.baseUrl);
+  await browser.get('/agenda/baru');
+  const response = await browser.post('/agenda', agendaForm(), {
+    headers: { origin: 'null', 'sec-fetch-site': 'same-origin' },
+  });
+  assert.equal(response.status, 303);
+});
+
+test('Origin "null" dari situs lain tetap ditolak', async () => {
+  const browser = new Browser(server.baseUrl);
+  await browser.get('/agenda/baru');
+  const response = await browser.post('/agenda', agendaForm(), {
+    headers: { origin: 'null', 'sec-fetch-site': 'cross-site' },
+  });
+  assert.equal(response.status, 403);
+});
+
+test('Origin "null" tanpa token yang cocok tetap ditolak', async () => {
+  const browser = new Browser(server.baseUrl);
+  await browser.get('/agenda/baru');
+  const response = await browser.post('/agenda', [...agendaForm(), ['_csrf', 'x'.repeat(43)]], {
+    headers: { origin: 'null' },
+  });
+  assert.equal(response.status, 403);
+});

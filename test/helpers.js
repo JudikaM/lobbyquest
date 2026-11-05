@@ -55,7 +55,12 @@ class Browser {
 
   async request(pathname, { method = 'GET', form, headers = {} } = {}) {
     const url = new URL(pathname, this.baseUrl);
-    const init = { method, redirect: 'manual', headers: { ...headers } };
+    // Header seperti browser sungguhan: halaman memakai Referrer-Policy
+    // no-referrer, sehingga POST form dikirim dengan Origin "null".
+    const browserHeaders = method === 'GET'
+      ? { 'sec-fetch-site': 'none' }
+      : { origin: 'null', 'sec-fetch-site': 'same-origin' };
+    const init = { method, redirect: 'manual', headers: { ...browserHeaders, ...headers } };
     const cookie = this.cookieHeader(url.pathname);
     if (cookie) init.headers.cookie = cookie;
     if (form) {
