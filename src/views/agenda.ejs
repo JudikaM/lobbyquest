@@ -84,9 +84,11 @@
 <section class="share">
   <label class="field">
     Tautan berbagi
-    <input type="text" value="<%= shareUrl %>" readonly onfocus="this.select()">
+    <input type="text" value="<%= shareUrl %>" readonly data-select-on-focus>
   </label>
   <p class="note"><%= privacyNotice %></p>
 </section>
+
+<script src="/agenda.js"></script>
 
 <%- include('partials/footer') %>

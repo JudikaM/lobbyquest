@@ -2,6 +2,7 @@ const path = require('node:path');
 const express = require('express');
 const { loadConfig } = require('./config');
 const routes = require('./routes');
+const { securityHeaders } = require('./security/headers');
 
 // Membuat aplikasi Express tanpa langsung mendengarkan port, sehingga bisa
 // dipakai oleh server maupun test.
@@ -11,7 +12,9 @@ function createApp({ config = loadConfig() } = {}) {
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, 'views'));
   app.set('config', config);
+  app.disable('x-powered-by');
 
+  app.use(securityHeaders(config));
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(express.urlencoded({ extended: false, limit: '20kb' }));
   app.use(routes);
