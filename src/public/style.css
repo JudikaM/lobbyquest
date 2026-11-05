@@ -1008,6 +1008,13 @@ input[type="radio"] {
   margin: 0;
 }
 
+.calendar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
 .countdown {
   display: inline-flex;
   align-items: center;

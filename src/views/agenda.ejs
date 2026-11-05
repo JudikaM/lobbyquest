@@ -47,6 +47,10 @@
       <p class="panel-title"><%= status === 'done' ? 'Sudah berlangsung' : 'Waktu final' %></p>
       <p class="final-value" data-local-time data-start="<%= agenda.finalOption.starts_at %>" data-end="<%= agenda.finalOption.ends_at %>"><%= finalLabel %></p>
       <% if (status === 'scheduled') { %>
+      <div class="calendar-actions">
+        <a class="button button-secondary button-small" href="<%= calendarUrl %>" download>Simpan ke kalender (.ics)</a>
+        <a class="button button-ghost button-small" href="<%= googleCalendarUrl %>" target="_blank" rel="noopener noreferrer">Google Calendar</a>
+      </div>
       <p class="countdown" data-countdown data-start="<%= agenda.finalOption.starts_at %>" data-end="<%= agenda.finalOption.ends_at %>" hidden></p>
       <% } %>
     </div>
