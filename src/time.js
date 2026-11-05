@@ -67,6 +67,13 @@ function formatMoment(date, timeZone) {
   return `${text} ${TIMEZONES[timeZone] || timeZone}`;
 }
 
+// Contoh: "1 Desember 2026".
+function formatDate(date, timeZone) {
+  return new Intl.DateTimeFormat('id-ID', {
+    timeZone, day: 'numeric', month: 'long', year: 'numeric',
+  }).format(date);
+}
+
 // Contoh: "Minggu, 1 November 2026, 19.00–22.00 WIB".
 function formatRange(startsAt, endsAt, timeZone) {
   const date = new Intl.DateTimeFormat('id-ID', {
@@ -93,5 +100,6 @@ module.exports = {
   localToUtc,
   utcToLocalInput,
   formatMoment,
+  formatDate,
   formatRange,
 };

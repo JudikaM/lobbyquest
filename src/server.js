@@ -10,6 +10,7 @@ try {
 
 const db = require('./db');
 const { createApp } = require('./app');
+const { schedulePurge } = require('./retention');
 
 if (config.isProduction && !config.publicUrl) {
   console.warn('Peringatan: PUBLIC_URL belum diatur. Tautan berbagi memakai header Host dari klien.');
@@ -19,6 +20,7 @@ const app = createApp({ config });
 const server = app.listen(config.port, () => {
   console.log(`LobbyQuest berjalan di http://localhost:${config.port}`);
 });
+schedulePurge(config.retentionDays);
 
 // Menutup koneksi dengan rapi saat proses dihentikan (Ctrl+C, docker stop).
 function shutdown() {
