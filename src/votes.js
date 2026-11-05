@@ -1,5 +1,6 @@
 const crypto = require('node:crypto');
 const db = require('./db');
+const { cleanText, list } = require('./text');
 
 const NAME_MAX = 40;
 const MAX_PARTICIPANTS = 50;
@@ -10,15 +11,10 @@ function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
 }
 
-function list(value) {
-  if (value === undefined) return [];
-  return Array.isArray(value) ? value : [value];
-}
-
 // Memeriksa isian form suara untuk agenda tertentu. `optionIds` hanya berisi
 // ID pilihan waktu milik agenda ini.
 function validateVote(body = {}, agenda) {
-  const name = typeof body.name === 'string' ? body.name.trim() : '';
+  const name = cleanText(body.name);
   const allowed = new Set(agenda.timeOptions.map((option) => option.id));
   const submitted = list(body.option);
   const optionIds = [];

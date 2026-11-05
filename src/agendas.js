@@ -1,6 +1,7 @@
 const crypto = require('node:crypto');
 const db = require('./db');
 const { TIMEZONES, DEFAULT_TIMEZONE, localToUtc, formatMoment } = require('./time');
+const { cleanText, list } = require('./text');
 
 const KINDS = { mabar: 'Mabar', nongkrong: 'Nongkrong' };
 const LIMITS = { titleMin: 3, title: 100, description: 1000, location: 150 };
@@ -8,12 +9,7 @@ const MIN_SLOTS = 2;
 const MAX_SLOTS = 10;
 
 function text(value) {
-  return typeof value === 'string' ? value.trim() : '';
-}
-
-function list(value) {
-  if (value === undefined) return [];
-  return Array.isArray(value) ? value : [value];
+  return cleanText(value);
 }
 
 // Memeriksa isian form agenda. Mengembalikan `values` (isian mentah untuk
@@ -25,7 +21,7 @@ function validateAgenda(body = {}, now = new Date()) {
   const values = {
     title: text(body.title),
     kind: text(body.kind),
-    description: text(body.description),
+    description: cleanText(body.description, { multiline: true }),
     location: text(body.location),
     timezone: text(body.timezone) || DEFAULT_TIMEZONE,
     slots: starts.map((start, i) => ({ start: text(start), end: text(ends[i]) })),
