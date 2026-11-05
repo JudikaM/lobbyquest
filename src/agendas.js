@@ -5,7 +5,7 @@ const { cleanText, list } = require('./text');
 const managers = require('./managers');
 
 const KINDS = { mabar: 'Mabar', nongkrong: 'Nongkrong' };
-const LIMITS = { titleMin: 3, title: 100, description: 1000, location: 150 };
+const LIMITS = { titleMin: 3, title: 100, description: 1000, location: 150, capacityMin: 2, capacityMax: 50 };
 const MIN_SLOTS = 2;
 const MAX_SLOTS = 10;
 
@@ -25,6 +25,7 @@ function validateAgenda(body = {}, now = new Date()) {
     description: cleanText(body.description, { multiline: true }),
     location: text(body.location),
     timezone: text(body.timezone) || DEFAULT_TIMEZONE,
+    capacity: text(body.capacity),
     slots: starts.map((start, i) => ({ start: text(start), end: text(ends[i]) })),
   };
   const errors = [];
@@ -47,6 +48,14 @@ function validateAgenda(body = {}, now = new Date()) {
   }
   if (!validTimezone) {
     errors.push('Zona waktu tidak dikenal.');
+  }
+
+  let capacity = null;
+  if (values.capacity) {
+    capacity = /^\d{1,3}$/.test(values.capacity) ? Number(values.capacity) : NaN;
+    if (!(capacity >= LIMITS.capacityMin && capacity <= LIMITS.capacityMax)) {
+      errors.push(`Kuota party harus angka ${LIMITS.capacityMin}–${LIMITS.capacityMax}, atau dikosongkan.`);
+    }
   }
 
   const slots = [];
@@ -103,6 +112,7 @@ function validateAgenda(body = {}, now = new Date()) {
       description: values.description || null,
       location: values.location || null,
       timezone: values.timezone,
+      capacity,
       slots,
     },
   };
@@ -110,9 +120,9 @@ function validateAgenda(body = {}, now = new Date()) {
 
 const insertAgenda = db.prepare(`
   INSERT INTO agendas
-    (slug, title, kind, description, location, timezone, created_at, manager_token_hash)
+    (slug, title, kind, description, location, timezone, capacity, created_at, manager_token_hash)
   VALUES
-    (@slug, @title, @kind, @description, @location, @timezone, @createdAt, @managerTokenHash)
+    (@slug, @title, @kind, @description, @location, @timezone, @capacity, @createdAt, @managerTokenHash)
 `);
 const insertTimeOption = db.prepare(`
   INSERT INTO time_options (agenda_id, starts_at, ends_at) VALUES (?, ?, ?)
@@ -132,6 +142,7 @@ const createAgenda = db.transaction((agenda) => {
     description: agenda.description,
     location: agenda.location,
     timezone: agenda.timezone,
+    capacity: agenda.capacity ?? null,
     createdAt: new Date().toISOString(),
     managerTokenHash: manager.hash,
   });
@@ -144,7 +155,7 @@ const createAgenda = db.transaction((agenda) => {
 // Hash token pengelola sengaja tidak ikut dipilih agar tidak pernah sampai
 // ke template.
 const selectAgenda = db.prepare(`
-  SELECT id, slug, title, kind, description, location, timezone, created_at,
+  SELECT id, slug, title, kind, description, location, timezone, capacity, created_at,
          final_option_id, finalized_at,
          manager_token_hash IS NOT NULL AS has_manager
   FROM agendas WHERE slug = ?

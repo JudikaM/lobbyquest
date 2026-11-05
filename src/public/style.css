@@ -510,6 +510,7 @@ small {
 
 input[type="text"],
 input[type="password"],
+input[type="number"],
 input[type="datetime-local"],
 select,
 textarea {
@@ -538,6 +539,10 @@ textarea:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 1px;
   border-color: var(--focus);
+}
+
+.input-short {
+  max-width: 8rem;
 }
 
 input[readonly] {
@@ -1194,6 +1199,39 @@ input[type="radio"] {
 .rsvp-no {
   color: var(--no);
   background: var(--no-bg);
+}
+
+/* Kuota party. */
+.party-slots {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+  font-size: 0.92rem;
+}
+
+.slot-pips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.pip {
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 2px solid var(--line-strong);
+  border-radius: 3px;
+  transform: rotate(45deg);
+}
+
+.pip.is-filled {
+  background: var(--ready);
+  border-color: var(--ready);
+}
+
+.party-slots.is-full {
+  color: var(--ready);
+  font-weight: 600;
 }
 
 /* Party. */

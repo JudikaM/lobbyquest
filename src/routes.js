@@ -169,6 +169,7 @@ function renderAgenda(req, res, agenda, {
     managerWelcome: req.query.kelola === '1',
     finalSaved: req.query.ditetapkan === '1',
     manageErrors,
+    capacity: agenda.capacity,
     rsvpLabels: rsvp.RSVP_LABELS,
     rsvpSummary: rsvp.rsvpSummary(agenda.id),
     rsvpValues: rsvpValues || {
@@ -206,6 +207,7 @@ function createRouter(limiters) {
       kind: '',
       description: '',
       location: '',
+      capacity: '',
       timezone: DEFAULT_TIMEZONE,
       slots: [emptySlot, emptySlot, emptySlot],
     });
@@ -367,6 +369,13 @@ function createRouter(limiters) {
     try {
       newToken = rsvp.saveRsvp(agenda, findCurrentParticipant(req, agenda), values);
     } catch (error) {
+      if (error.code === 'PARTY_FULL') {
+        res.status(409);
+        return renderAgenda(req, res, agenda, {
+          rsvpValues: values,
+          rsvpErrors: [`Party sudah penuh (${agenda.capacity}/${agenda.capacity}). Pilih "Mungkin" untuk masuk daftar cadangan.`],
+        });
+      }
       if (error.code !== 'PARTICIPANT_LIMIT') throw error;
       res.status(409);
       return renderAgenda(req, res, agenda, {
