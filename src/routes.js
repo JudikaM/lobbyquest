@@ -285,6 +285,8 @@ function renderAgenda(req, res, agenda, {
     },
     rsvpErrors,
     justCreated: req.query.baru === '1',
+    // Sorot baris "kamu" di lobby sesaat setelah vote/RSVP tersimpan.
+    justActed: req.query.tersimpan === '1' || req.query.hadir === '1',
     privacyNotice: PRIVACY_NOTICE,
     expiresLabel: formatDate(expiryDate(lastEnd, retentionDays), agenda.timezone),
   });

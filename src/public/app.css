@@ -4375,3 +4375,49 @@
     margin-top: var(--space-3);
   }
 }
+
+/* =========================================================================
+   Microinteraction tambahan (otomatis mati dengan prefers-reduced-motion)
+   ========================================================================= */
+
+@layer components {
+  .segment:has(input:checked) .icon {
+    animation: pop-in-sm 360ms var(--ease-spring);
+  }
+
+  .option-card,
+  .kind-card {
+    will-change: transform;
+  }
+
+  @media (hover: hover) {
+    .option-card:hover,
+    .kind-card:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .option-card:has(input:checked):hover {
+      box-shadow: 0 0 0 1px var(--foreground), var(--shadow-md);
+    }
+  }
+
+  .lobby-member.is-new {
+    animation: join-glow 1.6s var(--ease-out) 300ms both;
+  }
+
+  .lobby-member.is-new .avatar {
+    animation: pop-in 520ms var(--ease-spring) 200ms both;
+  }
+}
+
+@keyframes pop-in-sm {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+@keyframes join-glow {
+  0% { box-shadow: 0 0 0 0 var(--glow); background: color-mix(in srgb, var(--brand) 22%, var(--muted)); }
+  100% { box-shadow: 0 0 0 12px transparent; }
+}

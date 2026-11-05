@@ -281,7 +281,7 @@
           <% if (party.length) { %>
           <ul class="lobby-list">
             <% party.forEach((member) => { %>
-            <li class="lobby-member<%= member.isYou ? ' is-you' : '' %>">
+            <li class="lobby-member<%= member.isYou ? ' is-you' : '' %><%= member.isYou && justActed ? ' is-new' : '' %>">
               <span class="avatar <%= member.avatar %>" aria-hidden="true"><%= member.initial %><% if (member.rsvp) { %><span class="avatar-status status-<%= member.rsvp %>"><%- icon(member.rsvp === 'yes' ? 'check' : member.rsvp === 'maybe' ? 'circle-help' : 'x') %></span><% } %></span>
               <span class="lobby-name"><%= member.name %><% if (member.isYou) { %> <span class="lobby-you">(kamu)</span><% } %></span>
               <% if (member.state === 'voted') { %>
