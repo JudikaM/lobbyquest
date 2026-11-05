@@ -1,14 +1,16 @@
 const path = require('node:path');
 const express = require('express');
 const { loadConfig } = require('./config');
-const routes = require('./routes');
+const { createRouter } = require('./routes');
 const { securityHeaders } = require('./security/headers');
 const { csrfProtection } = require('./security/csrf');
 const { requireFormBody } = require('./security/body');
+const { createLimiters } = require('./security/rate-limit');
 
 // Membuat aplikasi Express tanpa langsung mendengarkan port, sehingga bisa
-// dipakai oleh server maupun test.
-function createApp({ config = loadConfig() } = {}) {
+// dipakai oleh server maupun test. `rateLimits` menimpa batas bawaan
+// (lihat security/rate-limit.js), misalnya untuk test.
+function createApp({ config = loadConfig(), rateLimits } = {}) {
   const app = express();
 
   app.set('view engine', 'ejs');
@@ -26,7 +28,7 @@ function createApp({ config = loadConfig() } = {}) {
   app.use(requireFormBody);
   app.use(express.urlencoded({ extended: false, limit: '20kb' }));
   app.use(csrfProtection(config));
-  app.use(routes);
+  app.use(createRouter(createLimiters(rateLimits)));
 
   app.use((req, res) => {
     res.status(404).render('error', {
