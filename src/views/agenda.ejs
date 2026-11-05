@@ -167,6 +167,22 @@
 </section>
 <% } %>
 
+<% if (leftAgenda) { %>
+<p class="success" role="status">Nama, suara, dan konfirmasimu sudah dihapus dari agenda ini.</p>
+<% } %>
+
+<% if (participant) { %>
+<section class="leave" aria-label="Data kamu di agenda ini">
+  <form method="post" action="/a/<%= agenda.slug %>/keluar">
+    <%- include('partials/csrf') %>
+    <p class="note">
+      Kamu tercatat sebagai <strong><%= participant.name %></strong> di browser ini.
+      <button type="submit" class="link-button">Hapus namaku dari agenda ini</button>
+    </p>
+  </form>
+</section>
+<% } %>
+
 <% if (isManager) { %>
 <section class="manage" id="kelola" aria-labelledby="kelola-judul">
   <h2 id="kelola-judul">Panel pengelola</h2>
