@@ -7,10 +7,32 @@ const rsvp = require('./rsvp');
 const { initial, avatarClass, fillClass } = require('./presenters');
 const { shareText, shareLinks } = require('./share');
 const calendar = require('./calendar');
+const { iconNames } = require('./ui/icons');
 const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, formatDate, utcToLocalInput } = require('./time');
 const { readCookie, cookieOptions } = require('./security/cookies');
 const { publicOrigin } = require('./urls');
 const { expiryDate } = require('./retention');
+
+const DESIGN_SWATCHES = [
+  ['background', 'Latar halaman'],
+  ['card', 'Permukaan kartu'],
+  ['muted', 'Permukaan redup'],
+  ['foreground', 'Teks utama'],
+  ['muted-foreground', 'Teks pendukung'],
+  ['primary', 'Aksi utama netral'],
+  ['brand', 'Volt: momen penting'],
+  ['brand-text', 'Teks merek'],
+  ['border', 'Garis pemisah'],
+  ['input', 'Batas kontrol (≥3:1)'],
+  ['ring', 'Cincin fokus'],
+  ['destructive', 'Aksi berbahaya'],
+  ['ready', 'Status siap'],
+  ['maybe', 'Status mungkin'],
+  ['absent', 'Status absen'],
+  ['afk', 'Status AFK'],
+  ['info', 'Informasi'],
+  ['chart-lead', 'Bar sorotan'],
+];
 
 const PRIVACY_NOTICE =
   'Siapa pun yang memiliki tautan dapat melihat agenda ini. ' +
@@ -210,6 +232,16 @@ function createRouter(limiters) {
 
   router.get('/', (req, res) => {
     res.render('home', { title: 'Beranda', deleted: req.query.dihapus === '1' });
+  });
+
+  // Etalase sistem desain: token, ikon, dan komponen dalam keadaan nyata.
+  router.get('/desain', (req, res) => {
+    res.render('design', {
+      title: 'Sistem desain',
+      description: 'Token, ikon, dan komponen antarmuka LobbyQuest.',
+      iconNames,
+      swatches: DESIGN_SWATCHES,
+    });
   });
 
   router.get('/health', (req, res) => {

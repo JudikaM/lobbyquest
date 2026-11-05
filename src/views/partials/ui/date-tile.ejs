@@ -1,0 +1,6 @@
+<%# Petak tanggal: include('partials/ui/date-tile', { tile: { weekday, day, month, variant } }) %>
+<span class="date-tile<% if (tile.variant) { %> date-tile-<%= tile.variant %><% } %>" aria-hidden="true">
+  <span class="date-tile-wd"><%= tile.weekday %></span>
+  <span class="date-tile-day"><%= tile.day %></span>
+  <span class="date-tile-mo"><%= tile.month %></span>
+</span>

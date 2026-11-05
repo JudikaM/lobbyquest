@@ -103,12 +103,12 @@ p {
   margin: 0 0 0.75rem;
 }
 
-a {
+.wrap a {
   color: var(--brand-text);
   text-underline-offset: 0.18em;
 }
 
-a:hover {
+.wrap a:hover {
   text-decoration-thickness: 2px;
 }
 

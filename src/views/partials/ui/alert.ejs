@@ -1,0 +1,22 @@
+<%#
+  Alert. Panggil dengan objek tunggal agar tidak bertabrakan dengan locals
+  halaman: include('partials/ui/alert', { alert: { variant, title, text,
+  items, focus, id } }). variant: default|destructive|success|warning|info.
+  items: array teks atau { text, href }.
+%>
+<% const a = alert; const v = a.variant || 'default'; %>
+<% const alertIcons = { destructive: 'circle-alert', success: 'circle-check', warning: 'triangle-alert', info: 'info', default: 'info' }; %>
+<div class="alert alert-<%= v %>"<% if (a.id) { %> id="<%= a.id %>"<% } %> role="<%= v === 'destructive' ? 'alert' : 'status' %>"<% if (a.focus) { %> tabindex="-1" data-focus-on-load<% } %>>
+  <%- icon(alertIcons[v] || 'info', { size: 18 }) %>
+  <% if (a.title) { %><p class="alert-title"><%= a.title %></p><% } %>
+  <div class="alert-description">
+    <% if (a.text) { %><p><%= a.text %></p><% } %>
+    <% if (a.items && a.items.length) { %>
+    <ul>
+      <% a.items.forEach((item) => { %>
+      <li><% if (item && item.href) { %><a href="<%= item.href %>"><%= item.text %></a><% } else { %><%= item && item.text ? item.text : item %><% } %></li>
+      <% }) %>
+    </ul>
+    <% } %>
+  </div>
+</div>
