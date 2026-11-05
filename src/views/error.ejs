@@ -1,10 +1,35 @@
-<%- include('partials/header') %>
+<%- include('partials/header', { redesigned: true }) %>
 
-<section class="panel error-panel">
-  <p class="eyebrow">Ups</p>
-  <h1><%= title %></h1>
-  <p><%= message %></p>
-  <p><a class="button button-secondary" href="/">Kembali ke beranda</a></p>
+<%
+  const code = locals.statusCode || 500;
+  const looks = {
+    403: ['shield-alert', 'Akses ditolak'],
+    404: ['ghost', 'Tidak ditemukan'],
+    413: ['file-x', 'Terlalu besar'],
+    415: ['file-x', 'Format tidak didukung'],
+    422: ['circle-alert', 'Tidak bisa diproses'],
+    429: ['timer', 'Terlalu cepat'],
+  };
+  const [errorIcon, errorTag] = looks[code] || ['server-crash', 'Gangguan server'];
+%>
+
+<section class="container error-page" aria-labelledby="error-judul">
+  <div class="error-card">
+    <div class="error-visual" aria-hidden="true">
+      <span class="error-icon"><%- icon(errorIcon, { size: 32 }) %></span>
+      <span class="error-code mono"><%= code %></span>
+    </div>
+    <p class="kicker"><%= errorTag %></p>
+    <h1 class="page-title" id="error-judul"><%= title %></h1>
+    <p class="lead"><%= message %></p>
+    <% if (code === 404) { %>
+    <p class="hint">Agenda lama terhapus otomatis setelah beberapa minggu, dan pengelola bisa menghapus agenda kapan saja. Minta tautan terbaru ke temanmu.</p>
+    <% } %>
+    <div class="btn-row error-actions">
+      <a class="btn btn-primary" href="/"><%- icon('house') %>Ke beranda</a>
+      <a class="btn btn-outline" href="/agenda/baru"><%- icon('plus') %>Buat lobby baru</a>
+    </div>
+  </div>
 </section>
 
 <%- include('partials/footer') %>

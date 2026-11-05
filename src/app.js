@@ -29,6 +29,11 @@ function createApp({ config = loadConfig(), rateLimits } = {}) {
   app.set('trust proxy', config.trustProxy);
 
   app.use(securityHeaders(config));
+  // Kode status tersedia di template (dipakai halaman error).
+  app.use((req, res, next) => {
+    Object.defineProperty(res.locals, 'statusCode', { enumerable: true, get: () => res.statusCode });
+    next();
+  });
   app.use(express.static(path.join(__dirname, 'public')));
   // Halaman dinamis memuat token per browser, jadi tidak boleh di-cache.
   app.use((req, res, next) => {
