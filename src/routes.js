@@ -5,6 +5,7 @@ const participants = require('./participants');
 const managers = require('./managers');
 const rsvp = require('./rsvp');
 const { initial, avatarClass, fillClass } = require('./presenters');
+const { shareText, shareLinks } = require('./share');
 const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, formatDate, utcToLocalInput } = require('./time');
 const { readCookie, cookieOptions } = require('./security/cookies');
 const { publicOrigin } = require('./urls');
@@ -97,6 +98,11 @@ function renderAgenda(req, res, agenda, {
     agenda.created_at
   );
   const { retentionDays } = req.app.get('config');
+  const finalLabel = agenda.finalOption
+    ? formatRange(agenda.finalOption.starts_at, agenda.finalOption.ends_at, agenda.timezone)
+    : null;
+  const shareUrl = `${origin}/a/${agenda.slug}`;
+  const text = shareText(agenda, { finalLabel });
   res.render('agenda', {
     title: agenda.title,
     noindex: true,
@@ -105,9 +111,7 @@ function renderAgenda(req, res, agenda, {
     timezoneLabel: `${TIMEZONES[agenda.timezone]} (${agenda.timezone})`,
     status: agenda.status,
     statusLabel: agendas.STATUS_LABELS[agenda.status],
-    finalLabel: agenda.finalOption
-      ? formatRange(agenda.finalOption.starts_at, agenda.finalOption.ends_at, agenda.timezone)
-      : null,
+    finalLabel,
     timeOptions: agenda.timeOptions.map((option) => {
       const names = voters.get(option.id);
       return {
@@ -137,7 +141,9 @@ function renderAgenda(req, res, agenda, {
     },
     voteErrors,
     nameMax: participants.NAME_MAX,
-    shareUrl: `${origin}/a/${agenda.slug}`,
+    shareUrl,
+    shareText: text,
+    shareLinks: shareLinks(shareUrl, text),
     isManager: Boolean(manager),
     // Kode ada di fragment (#) sehingga tidak ikut terkirim ke server saat
     // tautan dibuka; halaman /kelola mengirimkannya lewat POST.
