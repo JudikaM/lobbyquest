@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-05
+
 ### Added
 
 - Manager access for agenda creators: a 256-bit token stored only as a hash,
@@ -24,13 +26,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Share panel: copy link, native share sheet, WhatsApp, and Telegram.
 - Countdown to the final time and times shown in the viewer's time zone.
 - Device time zone preselected on the agenda form.
-- Open Graph link previews with a self-hosted image.
-- Lobby-themed interface with light/dark themes, self-hosted display font,
-  and accessibility improvements.
+- Open Graph link previews with a self-hosted image rebuilt from the app's
+  own fonts and hero illustration.
+- A "Ready Room" design system: shadcn-style CSS tokens (color, radius,
+  spacing, type, shadow, motion) with a light/dark/system theme toggle
+  remembered in a preference cookie and rendered server-side with no flash.
+- Self-hosted Geist and Geist Mono fonts, subset to the glyphs in use.
+- All UI icons from Lucide, rendered as inline SVG from a build-time
+  registry; see `/desain` for every token, icon, and component in one page.
+- A component library (buttons, inputs, cards, badges, alerts, toasts,
+  dialogs/sheets on native `<dialog>`, tabs, avatars, progress bars,
+  skeletons) and a custom SVG hero illustration, used to redesign every
+  page: home, the agenda form (quick time presets, live preview), the
+  agenda/lobby page, manager sign-in, and error pages.
+- App icons, web manifest, and favicon generated from the brand mark.
 - Test suite (`node:test`), ESLint, GitHub Actions CI with `npm audit`, and
   Dependabot.
 - Environment-based configuration documented in `.env.example`.
 - SECURITY.md, CONTRIBUTING.md, and issue/PR templates.
+
+### Performance
+
+- Text responses (HTML, CSS, JS, SVG, JSON) are compressed with Brotli/gzip.
 
 ### Security
 
@@ -44,11 +61,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Secure cookies in production, `__Host-` prefixed CSRF cookie, and
   `no-store` caching for dynamic pages.
 - SQLite `secure_delete` enabled; `/health` no longer reports uptime.
+- CSRF: same-site form posts that browsers send with `Origin: null` (a
+  consequence of `Referrer-Policy: no-referrer`) are now accepted instead
+  of rejected; cross-site posts are still blocked via `Sec-Fetch-Site`.
+- Calendar export: semicolons in event text are escaped per RFC 5545.
 
 ### Changed
 
 - The Express app is created by `createApp()` for testability; routes are
   built per app instance.
+
+### Accessibility
+
+- Every interactive control meets a 44px touch-target floor, verified by
+  measurement and real clicks rather than by the visual box alone.
+- Zero axe-core violations (WCAG 2.1/2.2 A/AA) across every page, theme,
+  and width (375/768/1440px) in CI-equivalent checks.
 
 ## [0.1.0]
 
