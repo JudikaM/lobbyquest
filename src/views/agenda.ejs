@@ -10,7 +10,7 @@
 <p class="flash flash-success" role="status">Nama, suara, dan konfirmasimu sudah dihapus dari agenda ini.</p>
 <% } %>
 
-<article class="lobby" aria-labelledby="agenda-judul">
+<article class="lobby" aria-labelledby="agenda-judul" data-agenda-timezone="<%= agenda.timezone %>">
   <header class="panel lobby-head">
     <p class="lobby-kicker">
       <span class="kind-badge kind-<%= agenda.kind %>"><span aria-hidden="true"><%= agenda.kind === 'mabar' ? '🎮' : '☕' %></span> <%= kindLabel %></span>
@@ -46,6 +46,9 @@
     <div class="panel final-time final-<%= status %>">
       <p class="panel-title"><%= status === 'done' ? 'Sudah berlangsung' : 'Waktu final' %></p>
       <p class="final-value" data-local-time data-start="<%= agenda.finalOption.starts_at %>" data-end="<%= agenda.finalOption.ends_at %>"><%= finalLabel %></p>
+      <% if (status === 'scheduled') { %>
+      <p class="countdown" data-countdown data-start="<%= agenda.finalOption.starts_at %>" data-end="<%= agenda.finalOption.ends_at %>" hidden></p>
+      <% } %>
     </div>
     <% } else if (status === 'expired') { %>
     <p class="flash flash-notice">Semua pilihan waktu sudah lewat tanpa waktu final.</p>
