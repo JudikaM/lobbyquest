@@ -2801,3 +2801,571 @@
     }
   }
 }
+
+/* =========================================================================
+   Halaman: beranda
+   ========================================================================= */
+
+@layer pages {
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: var(--space-10) var(--space-12);
+    border-bottom: 1px solid var(--border);
+    background:
+      radial-gradient(60rem 28rem at 85% -10%, color-mix(in srgb, var(--brand) 22%, transparent), transparent 70%),
+      radial-gradient(color-mix(in srgb, var(--foreground) 9%, transparent) 1px, transparent 1px) 0 0 / 22px 22px,
+      var(--background);
+  }
+
+  .hero::after {
+    /* Pudarkan pola titik ke bawah agar menyatu dengan section berikutnya. */
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 40%;
+    background: linear-gradient(transparent, var(--background));
+    pointer-events: none;
+  }
+
+  .hero-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: var(--space-10);
+    align-items: center;
+  }
+
+  .hero-copy {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-5);
+  }
+
+  .hero-badge {
+    gap: var(--space-2);
+    padding-inline: var(--space-2-5);
+    background: var(--card);
+  }
+
+  .hero-dot {
+    color: var(--ready);
+  }
+
+  .hero-title {
+    font-size: var(--text-display);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: var(--tracking-tighter);
+  }
+
+  /* Sorotan stabilo Volt di belakang kata kunci. */
+  .hl {
+    background: linear-gradient(transparent 66%, color-mix(in srgb, var(--brand) 65%, transparent) 66%, color-mix(in srgb, var(--brand) 65%, transparent) 90%, transparent 90%);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    padding-inline: 0.04em;
+  }
+
+  .hero-lead {
+    max-width: 34rem;
+  }
+
+  .hero-lead strong {
+    color: var(--foreground);
+    font-weight: 600;
+  }
+
+  .hero-actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .hero-trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--text-sm);
+    color: var(--muted-foreground);
+  }
+
+  .hero-trust li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1-5);
+  }
+
+  .hero-trust .icon {
+    color: var(--foreground);
+  }
+
+  .hero-visual {
+    display: grid;
+    place-items: center;
+  }
+
+  .hero-art {
+    width: 100%;
+    max-width: 34rem;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Ilustrasi: semua warna dari token, jadi otomatis mengikuti tema. */
+  .ha-card {
+    fill: var(--card);
+    stroke: var(--border);
+    stroke-width: 1;
+    filter: drop-shadow(0 18px 30px rgb(10 10 12 / 12%));
+  }
+
+  .ha-card-pop {
+    stroke: var(--input);
+    stroke-opacity: 0.45;
+  }
+
+  .ha-orbit {
+    fill: none;
+    stroke: var(--input);
+    stroke-width: 1.5;
+    stroke-dasharray: 2 7;
+    stroke-linecap: round;
+    opacity: 0.7;
+  }
+
+  .ha-orbit-dot {
+    fill: var(--brand);
+    stroke: var(--brand-foreground);
+    stroke-width: 1;
+  }
+
+  .ha-kicker {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    fill: var(--muted-foreground);
+  }
+
+  .ha-title {
+    font-family: var(--font-sans);
+    font-size: 21px;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    fill: var(--foreground);
+  }
+
+  .ha-badge {
+    fill: var(--info-soft);
+  }
+
+  .ha-live {
+    fill: var(--info);
+  }
+
+  .ha-badge-text {
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    font-weight: 600;
+    fill: var(--info-text);
+  }
+
+  .ha-tile {
+    fill: var(--card);
+    stroke: var(--border);
+  }
+
+  .ha-tile-brand {
+    stroke: color-mix(in srgb, var(--brand) 70%, var(--border));
+  }
+
+  .ha-tile-strip {
+    fill: var(--brand);
+  }
+
+  .ha-tile-wd {
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    letter-spacing: 0.08em;
+    text-anchor: middle;
+    fill: var(--muted-foreground);
+  }
+
+  .ha-tile-day {
+    font-family: var(--font-sans);
+    font-size: 17px;
+    font-weight: 650;
+    text-anchor: middle;
+    fill: var(--foreground);
+  }
+
+  .ha-time {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    fill: var(--foreground);
+  }
+
+  .ha-track {
+    fill: var(--chart-track);
+  }
+
+  .ha-bar {
+    fill: var(--chart-rest);
+  }
+
+  .ha-bar-lead {
+    fill: var(--chart-lead);
+  }
+
+  .ha-count {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 650;
+    fill: var(--foreground);
+  }
+
+  .ha-crown {
+    fill: var(--brand);
+    stroke: var(--brand-foreground);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+  }
+
+  .ha-av {
+    stroke: var(--card);
+    stroke-width: 2.5;
+  }
+
+  .ha-av-0 { fill: var(--av-0-bg); }
+  .ha-av-1 { fill: var(--av-1-bg); }
+  .ha-av-3 { fill: var(--av-3-bg); }
+  .ha-av-4 { fill: var(--av-4-bg); }
+
+  .ha-av-slot {
+    fill: var(--card);
+    stroke: var(--input);
+    stroke-width: 1.2;
+    stroke-dasharray: 3 3;
+  }
+
+  .ha-av-t {
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+
+  .ha-av-t0 { fill: var(--av-0-fg); }
+  .ha-av-t1 { fill: var(--av-1-fg); }
+  .ha-av-t3 { fill: var(--av-3-fg); }
+  .ha-av-t4 { fill: var(--av-4-fg); }
+
+  .ha-plus {
+    stroke: var(--muted-foreground);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  .ha-party-text,
+  .ha-muted-sm {
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    fill: var(--muted-foreground);
+  }
+
+  .ha-big {
+    font-family: var(--font-sans);
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    fill: var(--foreground);
+  }
+
+  .ha-muted {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    fill: var(--muted-foreground);
+  }
+
+  .ha-lock-text {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 600;
+    fill: var(--foreground);
+  }
+
+  .ha-lock {
+    fill: none;
+    stroke: var(--brand-text);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .ha-seg-yes { fill: var(--ready); }
+  .ha-seg-maybe { fill: var(--maybe); }
+  .ha-seg-afk { fill: var(--afk); }
+
+  .ha-ready-ring {
+    fill: var(--brand);
+    stroke: color-mix(in srgb, var(--brand) 40%, transparent);
+    stroke-width: 6;
+    paint-order: stroke;
+  }
+
+  .ha-ready-check {
+    fill: none;
+    stroke: var(--brand-foreground);
+    stroke-width: 3.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .ha-sparkle {
+    fill: var(--brand);
+    stroke: var(--brand-foreground);
+    stroke-width: 1;
+    stroke-linejoin: round;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ha-float-a { animation: float 7s var(--ease-in-out) infinite; }
+    .ha-float-b { animation: float 6s var(--ease-in-out) -2s infinite; }
+    .ha-float-c { animation: float 8s var(--ease-in-out) -4s infinite; }
+    .ha-ready-ring { animation: ready-pulse 2.4s var(--ease-out) infinite; }
+    .ha-sparkle { animation: twinkle 3.2s var(--ease-in-out) infinite; transform-box: fill-box; transform-origin: center; }
+    .ha-sparkle-sm { animation-delay: -1.6s; }
+  }
+
+  /* Section umum */
+  .section {
+    padding-block: var(--space-16) 0;
+  }
+
+  .section-head {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 40rem;
+    margin-bottom: var(--space-8);
+  }
+
+  /* Quest log: langkah bernomor */
+  .steps {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .step {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .step-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
+  }
+
+  .step-icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--brand-foreground);
+    background: var(--brand);
+    border-radius: var(--radius-md);
+    box-shadow: inset 0 -2px 0 rgb(0 0 0 / 12%);
+  }
+
+  .step-num {
+    font-size: var(--text-xs);
+    color: var(--muted-foreground);
+  }
+
+  .step-title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
+  .step-text {
+    font-size: var(--text-sm);
+    color: var(--muted-foreground);
+  }
+
+  /* Bento fitur */
+  .bento {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .bento-body {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+    height: 100%;
+  }
+
+  .bento-icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-bottom: var(--space-2);
+    color: var(--foreground);
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+
+  .bento-title {
+    font-size: var(--text-base);
+    font-weight: 600;
+  }
+
+  .bento-demo {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+    padding: var(--space-4);
+    background: var(--muted);
+    border-radius: var(--radius-md);
+  }
+
+  .bento-bars {
+    gap: var(--space-2-5);
+  }
+
+  .bento-wide {
+    background:
+      radial-gradient(28rem 14rem at 100% 0, color-mix(in srgb, var(--brand) 14%, transparent), transparent 70%),
+      var(--card);
+  }
+
+  /* Pita CTA akhir */
+  .cta-band {
+    position: relative;
+    display: grid;
+    gap: var(--space-6);
+    padding: var(--space-8) var(--space-6);
+    overflow: hidden;
+    color: #f4f4f5;
+    background:
+      radial-gradient(36rem 18rem at 100% 100%, rgb(195 237 76 / 22%), transparent 70%),
+      radial-gradient(rgb(255 255 255 / 7%) 1px, transparent 1px) 0 0 / 20px 20px,
+      #111114;
+    border: 1px solid #26262c;
+    border-radius: var(--radius-2xl);
+  }
+
+  .cta-copy {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .cta-kicker {
+    color: #c3ed4c;
+  }
+
+  .cta-title {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    letter-spacing: var(--tracking-tighter);
+  }
+
+  .cta-text {
+    max-width: 30rem;
+    color: #a1a1aa;
+  }
+
+  .cta-band .btn {
+    justify-self: start;
+  }
+
+  @media (min-width: 40rem) {
+    .hero-actions .btn {
+      flex: 0 0 auto;
+    }
+
+    .steps,
+    .bento {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .bento-wide {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .hero {
+      padding-block: var(--space-20) var(--space-24);
+    }
+
+    .hero-grid {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: var(--space-12);
+    }
+
+    .steps {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    /* Garis quest yang menghubungkan langkah di desktop. */
+    .step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 2.5rem;
+      right: calc(var(--space-3) * -1);
+      width: var(--space-3);
+      height: 2px;
+      background: var(--border);
+    }
+
+    .bento {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .bento-wide {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+
+    .cta-band {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: var(--space-12);
+    }
+
+    .cta-band .btn {
+      justify-self: end;
+    }
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes ready-pulse {
+  0% { stroke-width: 0; stroke-opacity: 0.6; }
+  70%, 100% { stroke-width: 14; stroke-opacity: 0; }
+}
+
+@keyframes twinkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(0.75) rotate(20deg); opacity: 0.7; }
+}

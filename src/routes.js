@@ -13,6 +13,13 @@ const { readCookie, cookieOptions } = require('./security/cookies');
 const { publicOrigin } = require('./urls');
 const { expiryDate } = require('./retention');
 
+const HOME_STEPS = [
+  { icon: 'calendar-plus', title: 'Buat lobby', text: 'Tulis judul dan 2–10 pilihan waktu. Tidak perlu daftar akun.' },
+  { icon: 'share-2', title: 'Bagikan ke grup', text: 'Kirim tautannya ke WhatsApp, Discord, atau Telegram dengan sekali ketuk.' },
+  { icon: 'vote', title: 'Teman voting', text: 'Setiap orang mencentang waktu yang bisa; hasilnya langsung terlihat.' },
+  { icon: 'lock', title: 'Kunci & ready check', text: 'Kunci waktu terbaik, lalu semua menjawab siap, mungkin, atau absen.' },
+];
+
 const DESIGN_SWATCHES = [
   ['background', 'Latar halaman'],
   ['card', 'Permukaan kartu'],
@@ -231,7 +238,17 @@ function createRouter(limiters) {
   const router = express.Router();
 
   router.get('/', (req, res) => {
-    res.render('home', { title: 'Beranda', deleted: req.query.dihapus === '1' });
+    res.render('home', {
+      title: 'Beranda',
+      steps: HOME_STEPS,
+      toast: req.query.dihapus === '1'
+        ? {
+          title: 'Agenda dihapus',
+          description: 'Agenda dan seluruh datanya sudah dihapus permanen.',
+          closeHref: '/',
+        }
+        : null,
+    });
   });
 
   // Etalase sistem desain: token, ikon, dan komponen dalam keadaan nyata.
