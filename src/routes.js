@@ -6,6 +6,7 @@ const managers = require('./managers');
 const rsvp = require('./rsvp');
 const { initial, avatarClass, fillClass } = require('./presenters');
 const { shareText, shareLinks } = require('./share');
+const calendar = require('./calendar');
 const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, formatDate, utcToLocalInput } = require('./time');
 const { readCookie, cookieOptions } = require('./security/cookies');
 const { publicOrigin } = require('./urls');
@@ -78,6 +79,18 @@ function participantLimitMessage() {
   return `Agenda ini sudah mencapai batas ${participants.MAX_PARTICIPANTS} peserta.`;
 }
 
+function calendarEvent(agenda, url) {
+  return {
+    slug: agenda.slug,
+    title: agenda.title,
+    description: agenda.description,
+    location: agenda.location,
+    url,
+    startsAt: agenda.finalOption.starts_at,
+    endsAt: agenda.finalOption.ends_at,
+  };
+}
+
 function renderAgenda(req, res, agenda, {
   voteValues, voteErrors = [], manageErrors = [], rsvpValues, rsvpErrors = [],
 } = {}) {
@@ -142,6 +155,10 @@ function renderAgenda(req, res, agenda, {
     voteErrors,
     nameMax: participants.NAME_MAX,
     shareUrl,
+    calendarUrl: agenda.finalOption ? `/a/${agenda.slug}/kalender.ics` : null,
+    googleCalendarUrl: agenda.finalOption
+      ? calendar.googleCalendarUrl(calendarEvent(agenda, shareUrl))
+      : null,
     shareText: text,
     shareLinks: shareLinks(shareUrl, text),
     isManager: Boolean(manager),
@@ -218,6 +235,17 @@ function createRouter(limiters) {
 
   router.get('/a/:slug', (req, res) => {
     renderAgenda(req, res, req.agenda);
+  });
+
+  // File kalender hanya tersedia setelah waktu final ditetapkan.
+  router.get('/a/:slug/kalender.ics', (req, res, next) => {
+    const { agenda } = req;
+    if (!agenda.finalOption) return next();
+    const ics = calendar.buildIcs(calendarEvent(agenda, `${publicOrigin(req)}/a/${agenda.slug}`));
+    res.set('X-Robots-Tag', 'noindex, nofollow');
+    res.set('Content-Type', 'text/calendar; charset=utf-8');
+    res.set('Content-Disposition', 'attachment; filename="lobbyquest-agenda.ics"');
+    res.send(ics);
   });
 
   router.get('/a/:slug/kelola', (req, res) => {
