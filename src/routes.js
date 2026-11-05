@@ -1,6 +1,7 @@
 const express = require('express');
 const agendas = require('./agendas');
 const votes = require('./votes');
+const participants = require('./participants');
 const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, formatDate, utcToLocalInput } = require('./time');
 const { readCookie, cookieOptions } = require('./security/cookies');
 const { publicOrigin } = require('./urls');
@@ -9,7 +10,6 @@ const { expiryDate } = require('./retention');
 const PRIVACY_NOTICE =
   'Siapa pun yang memiliki tautan dapat melihat agenda ini. ' +
   'Hindari memasukkan data pribadi atau sensitif.';
-const PARTICIPANT_COOKIE = 'lq_peserta';
 
 function renderForm(res, values, errors = []) {
   // Form selalu menampilkan minimal dua baris pilihan waktu.
@@ -32,11 +32,12 @@ function renderForm(res, values, errors = []) {
 }
 
 function findCurrentParticipant(req, agenda) {
-  return votes.findParticipant(agenda.id, readCookie(req, PARTICIPANT_COOKIE));
+  return participants.findParticipant(agenda.id, readCookie(req, participants.COOKIE));
 }
 
 function renderAgenda(req, res, agenda, { voteValues, voteErrors = [] } = {}) {
   const participant = findCurrentParticipant(req, agenda);
+  const optionIds = votes.participantOptionIds(participant);
   const voters = votes.tallyVotes(agenda);
   const topCount = Math.max(0, ...[...voters.values()].map((names) => names.length));
 
@@ -63,14 +64,14 @@ function renderAgenda(req, res, agenda, { voteValues, voteErrors = [] } = {}) {
         isTop: topCount > 0 && names.length === topCount,
       };
     }),
-    participantCount: votes.participantCount(agenda.id),
+    participantCount: participants.participantCount(agenda.id),
     participant,
     voteValues: voteValues || {
       name: participant ? participant.name : '',
-      optionIds: participant ? participant.optionIds : [],
+      optionIds,
     },
     voteErrors,
-    nameMax: votes.NAME_MAX,
+    nameMax: participants.NAME_MAX,
     shareUrl: `${publicOrigin(req)}/a/${agenda.slug}`,
     justCreated: req.query.baru === '1',
     voteSaved: req.query.tersimpan === '1',
@@ -140,16 +141,16 @@ function createRouter(limiters) {
       res.status(409);
       return renderAgenda(req, res, agenda, {
         voteValues: values,
-        voteErrors: [`Agenda ini sudah mencapai batas ${votes.MAX_PARTICIPANTS} peserta.`],
+        voteErrors: [`Agenda ini sudah mencapai batas ${participants.MAX_PARTICIPANTS} peserta.`],
       });
     }
 
     if (newToken) {
       // Cookie hanya dikirim ke halaman agenda ini dan tidak bisa dibaca
       // JavaScript. SameSite=Lax mencegah situs lain mengubah suara peserta.
-      res.cookie(PARTICIPANT_COOKIE, newToken, cookieOptions(req, {
+      res.cookie(participants.COOKIE, newToken, cookieOptions(req, {
         path: `/a/${agenda.slug}`,
-        maxAge: 180 * 24 * 60 * 60 * 1000,
+        maxAge: participants.COOKIE_MAX_AGE,
       }));
     }
     res.redirect(303, `/a/${agenda.slug}?tersimpan=1#suara`);
