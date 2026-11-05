@@ -59,7 +59,7 @@ test('voting: peserta bisa mengubah suara dari browser yang sama saja', async ()
   const owner = new Browser(server.baseUrl);
   const agendaPath = await createAgenda(owner);
   const page = await owner.get(agendaPath);
-  const optionIds = [...page.text.matchAll(/name="option" value="(\d+)"/g)].map((m) => m[1]);
+  const optionIds = [...new Set([...page.text.matchAll(/name="option" value="(\d+)"/g)].map((m) => m[1]))];
   assert.equal(optionIds.length, 2);
 
   const budi = new Browser(server.baseUrl);

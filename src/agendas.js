@@ -145,6 +145,7 @@ const createAgenda = db.transaction((agenda) => {
 // ke template.
 const selectAgenda = db.prepare(`
   SELECT id, slug, title, kind, description, location, timezone, created_at,
+         final_option_id, finalized_at,
          manager_token_hash IS NOT NULL AS has_manager
   FROM agendas WHERE slug = ?
 `);
@@ -152,20 +153,68 @@ const selectTimeOptions = db.prepare(
   'SELECT * FROM time_options WHERE agenda_id = ? ORDER BY starts_at, ends_at'
 );
 
-function findAgendaBySlug(slug) {
-  if (!/^[A-Za-z0-9_-]{16}$/.test(slug)) return null;
+const STATUS_LABELS = {
+  voting: 'Voting berlangsung',
+  scheduled: 'Waktu ditetapkan',
+  done: 'Selesai',
+  expired: 'Tidak jadi ditetapkan',
+};
 
-  const agenda = selectAgenda.get(slug);
-  if (!agenda) return null;
-  return { ...agenda, timeOptions: selectTimeOptions.all(agenda.id) };
+// Status agenda dihitung dari data, bukan disimpan:
+// - voting: belum ada waktu final dan masih ada pilihan di masa depan;
+// - scheduled: waktu final sudah ditetapkan dan belum selesai;
+// - done: waktu final sudah selesai;
+// - expired: semua pilihan sudah lewat tanpa waktu final.
+function agendaStatus(agenda, now = new Date()) {
+  if (agenda.finalOption) {
+    return new Date(agenda.finalOption.ends_at) <= now ? 'done' : 'scheduled';
+  }
+  const hasFuture = agenda.timeOptions.some((option) => new Date(option.starts_at) > now);
+  return hasFuture ? 'voting' : 'expired';
 }
+
+function findAgendaBySlug(slug, now = new Date()) {
+  if (typeof slug !== 'string' || !/^[A-Za-z0-9_-]{16}$/.test(slug)) return null;
+
+  const row = selectAgenda.get(slug);
+  if (!row) return null;
+  const timeOptions = selectTimeOptions.all(row.id);
+  const agenda = {
+    ...row,
+    timeOptions,
+    finalOption: timeOptions.find((option) => option.id === row.final_option_id) || null,
+  };
+  agenda.status = agendaStatus(agenda, now);
+  return agenda;
+}
+
+// Pilihan waktu yang boleh ditetapkan: milik agenda ini dan belum dimulai.
+function finalizableOption(agenda, value, now = new Date()) {
+  const id = typeof value === 'string' && /^\d+$/.test(value) ? Number(value) : NaN;
+  const option = agenda.timeOptions.find((candidate) => candidate.id === id);
+  if (!option || new Date(option.starts_at) <= now) return null;
+  return option;
+}
+
+const updateFinal = db.prepare(
+  'UPDATE agendas SET final_option_id = ?, finalized_at = ? WHERE id = ?'
+);
+
+// Menetapkan (optionId) atau membatalkan (null) waktu final.
+const setFinalOption = db.transaction((agenda, optionId) => {
+  updateFinal.run(optionId, optionId ? new Date().toISOString() : null, agenda.id);
+});
 
 module.exports = {
   KINDS,
   LIMITS,
   MIN_SLOTS,
   MAX_SLOTS,
+  STATUS_LABELS,
   validateAgenda,
   createAgenda,
+  agendaStatus,
   findAgendaBySlug,
+  finalizableOption,
+  setFinalOption,
 };

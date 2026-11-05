@@ -16,14 +16,35 @@
   <p><strong>Lokasi/platform:</strong> <%= agenda.location %></p>
   <% } %>
 
+  <section class="status" id="status" aria-labelledby="status-judul">
+    <h2 id="status-judul" class="visually-hidden">Status agenda</h2>
+    <p class="status-pill status-<%= status %>"><%= statusLabel %></p>
+    <ol class="status-steps" aria-label="Tahapan agenda">
+      <li class="<%= status === 'voting' ? 'is-current' : 'is-done' %>"<% if (status === 'voting') { %> aria-current="step"<% } %>>Voting</li>
+      <li class="<%= status === 'scheduled' ? 'is-current' : (status === 'done' ? 'is-done' : '') %>"<% if (status === 'scheduled') { %> aria-current="step"<% } %>>Waktu ditetapkan</li>
+      <li class="<%= status === 'done' ? 'is-current' : '' %>"<% if (status === 'done') { %> aria-current="step"<% } %>>Selesai</li>
+    </ol>
+    <% if (finalSaved) { %>
+    <p class="success" role="status">Waktu final sudah ditetapkan.</p>
+    <% } %>
+    <% if (finalLabel) { %>
+    <div class="final-time">
+      <p class="final-label"><%= status === 'done' ? 'Sudah berlangsung' : 'Waktu final' %></p>
+      <p class="final-value"><%= finalLabel %></p>
+    </div>
+    <% } else if (status === 'expired') { %>
+    <p class="note">Semua pilihan waktu sudah lewat tanpa waktu final.</p>
+    <% } %>
+  </section>
+
   <h2>Pilihan waktu</h2>
   <p class="note">
     <%= participantCount %> orang sudah memilih. Semua waktu ditampilkan dalam <%= timezoneLabel %>.
   </p>
   <ol class="time-options">
     <% timeOptions.forEach((option) => { %>
-    <li class="<%= option.isTop ? 'is-top' : '' %>">
-      <span class="time-label"><%= option.label %></span>
+    <li class="<%= option.isTop ? 'is-top' : '' %> <%= option.isFinal ? 'is-final' : '' %>">
+      <span class="time-label"><%= option.label %><% if (option.isFinal) { %> <strong class="tag">Final</strong><% } %></span>
       <span class="vote-count">
         <%= option.voters.length %> bisa<% if (option.isTop) { %> · paling banyak dipilih<% } %>
       </span>
@@ -35,6 +56,7 @@
   </ol>
 </article>
 
+<% if (status === 'voting') { %>
 <section class="vote" id="suara">
   <h2><%= participant ? 'Ubah pilihanmu' : 'Pilih waktu yang kamu bisa' %></h2>
 
@@ -81,6 +103,7 @@
     </button>
   </form>
 </section>
+<% } %>
 
 <% if (isManager) { %>
 <section class="manage" id="kelola" aria-labelledby="kelola-judul">
@@ -89,6 +112,46 @@
   <p class="success" role="status">Kamu masuk sebagai pengelola agenda ini.</p>
   <% } %>
   <p class="note">Hanya kamu yang melihat bagian ini.</p>
+
+  <% if (manageErrors.length) { %>
+  <div class="errors" role="alert">
+    <ul>
+      <% manageErrors.forEach((error) => { %>
+      <li><%= error %></li>
+      <% }) %>
+    </ul>
+  </div>
+  <% } %>
+
+  <% if (status === 'voting' || status === 'scheduled') { %>
+  <form class="form" method="post" action="/a/<%= agenda.slug %>/tetapkan">
+    <%- include('partials/csrf') %>
+    <fieldset class="field">
+      <legend><%= status === 'scheduled' ? 'Ganti waktu final' : 'Tetapkan waktu final' %></legend>
+      <small>Pilih dari hasil voting. Hanya pilihan yang belum dimulai yang bisa ditetapkan.</small>
+      <div class="vote-options">
+        <% timeOptions.forEach((option) => { %>
+        <label class="choice">
+          <input type="radio" name="option" value="<%= option.id %>" required
+            <%= option.canFinalize ? '' : 'disabled' %>
+            <%= (option.isFinal || (!finalLabel && option.isTop)) && option.canFinalize ? 'checked' : '' %>>
+          <span><%= option.label %> · <%= option.voters.length %> bisa</span>
+        </label>
+        <% }) %>
+      </div>
+    </fieldset>
+    <button type="submit" class="primary-button">
+      <%= status === 'scheduled' ? 'Simpan waktu final' : 'Tetapkan waktu' %>
+    </button>
+  </form>
+  <% } %>
+
+  <% if (status === 'scheduled') { %>
+  <form method="post" action="/a/<%= agenda.slug %>/buka-voting">
+    <%- include('partials/csrf') %>
+    <button type="submit" class="secondary-button">Buka voting lagi</button>
+  </form>
+  <% } %>
 
   <details class="manager-link">
     <summary>Kelola dari perangkat lain</summary>
