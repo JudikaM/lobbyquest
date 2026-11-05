@@ -31,7 +31,7 @@ test('file statis juga mendapat security headers', async () => {
 test('HTML tidak memuat inline script, inline handler, atau inline style', async () => {
   const browser = new Browser(server.baseUrl);
   const created = await browser.post('/agenda', agendaForm());
-  const pages = ['/', '/agenda/baru', created.headers.get('location'), '/tidak-ada'];
+  const pages = ['/', '/agenda/baru', '/desain', created.headers.get('location'), '/tidak-ada'];
   for (const page of pages) {
     const { text } = await browser.get(page);
     assert.doesNotMatch(text, /<script(?![^>]*\bsrc=)[^>]*>/i, `inline script di ${page}`);

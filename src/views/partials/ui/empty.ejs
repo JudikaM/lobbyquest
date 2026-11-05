@@ -1,0 +1,6 @@
+<%# Empty state: include('partials/ui/empty', { empty: { icon, title, text } }) %>
+<div class="empty">
+  <span class="empty-icon"><%- icon(empty.icon || 'users', { size: 24 }) %></span>
+  <p class="empty-title"><%= empty.title %></p>
+  <% if (empty.text) { %><p class="empty-description"><%= empty.text %></p><% } %>
+</div>

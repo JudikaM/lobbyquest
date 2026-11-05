@@ -108,3 +108,12 @@ test('peserta bisa menghapus datanya sendiri, tidak data orang lain', async () =
   await new Browser(server.baseUrl).post(`${agendaPath}/keluar`);
   assert.match((await owner.get(agendaPath)).text, /1 orang sudah memilih/);
 });
+
+test('halaman sistem desain menampilkan komponen dan semua ikon terdaftar', async () => {
+  const browser = new Browser(server.baseUrl);
+  const page = await browser.get('/desain');
+  assert.equal(page.status, 200);
+  assert.match(page.text, /Ready Room/);
+  const { iconNames } = require('../src/ui/icons');
+  for (const name of iconNames) assert.ok(page.text.includes(`<span class="mono">${name}</span>`), name);
+});

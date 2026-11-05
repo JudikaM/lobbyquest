@@ -1,22 +1,26 @@
 <!doctype html>
-<html lang="id">
+<html lang="id"<% if (locals.theme) { %> data-theme="<%= theme %>"<% } %>>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0e111a" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="<%= locals.theme || 'light dark' %>">
+  <% if (locals.theme) { %>
+  <meta name="theme-color" content="<%= theme === 'dark' ? '#0b0b0d' : '#fafafa' %>">
+  <% } else { %>
+  <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b0b0d" media="(prefers-color-scheme: dark)">
+  <% } %>
   <% if (locals.noindex) { %>
   <meta name="robots" content="noindex, nofollow">
   <% } %>
   <title><%= title %> · LobbyQuest</title>
-  <meta name="description" content="<%= locals.description || 'Atur jadwal mabar dan nongkrong bareng teman: voting waktu, tetapkan jadwal, lalu ready check. Tanpa akun.' %>">
+  <meta name="description" content="<%= locals.description || 'Atur jadwal mabar dan nongkrong bareng teman: voting waktu, kunci jadwal, lalu ready check. Tanpa akun.' %>">
   <% const og = locals.og || {}; %>
   <meta property="og:site_name" content="LobbyQuest">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="id_ID">
   <meta property="og:title" content="<%= og.title || 'LobbyQuest: atur mabar & nongkrong bareng teman' %>">
-  <meta property="og:description" content="<%= og.description || 'Voting waktu, tetapkan jadwal, lalu ready check. Tanpa akun, tanpa pelacak.' %>">
+  <meta property="og:description" content="<%= og.description || 'Voting waktu, kunci jadwal, lalu ready check. Tanpa akun, tanpa pelacak.' %>">
   <% if (og.url) { %>
   <meta property="og:url" content="<%= og.url %>">
   <% } %>
@@ -30,19 +34,20 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="/fonts/geist-sans.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/app.css">
+  <% if (!locals.redesigned) { %>
   <link rel="stylesheet" href="/style.css">
+  <% } %>
 </head>
 <body>
   <a class="skip-link" href="#konten">Lewati ke konten</a>
-  <header class="site-header">
-    <div class="wrap header-inner">
-      <a class="brand" href="/">
-        <img src="/logo.svg" alt="" width="28" height="28">
-        <span>LobbyQuest</span>
-      </a>
-      <% if (!locals.hideHeaderCta) { %>
-      <a class="header-cta" href="/agenda/baru">Buat agenda</a>
-      <% } %>
+  <header class="app-header">
+    <div class="container app-header-inner">
+      <%- include('logo') %>
+      <div class="header-actions">
+        <% if (!locals.hideHeaderCta) { %>
+        <a class="btn btn-brand btn-sm" href="/agenda/baru"><%- icon('plus') %><span>Buat agenda</span></a>
+        <% } %>
+      </div>
     </div>
   </header>
-  <main id="konten" class="wrap" tabindex="-1">
+  <main id="konten" class="<%= locals.redesigned ? 'app-main' : 'wrap' %>" tabindex="-1">

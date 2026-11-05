@@ -1,0 +1,30 @@
+<%# Wilayah notifikasi. Toast dari server ada di locals.toast; template di
+    bawah dipakai app.js untuk toast dari JavaScript. %>
+<div class="toaster" role="region" aria-label="Notifikasi" data-toaster>
+  <% if (locals.toast) { %>
+  <div class="toast toast-<%= toast.variant || 'success' %>" role="status" data-toast>
+    <%- icon(toast.variant === 'error' ? 'circle-alert' : 'circle-check', { size: 18 }) %>
+    <div data-toast-body>
+      <p class="toast-title"><%= toast.title %></p>
+      <% if (toast.description) { %><p class="toast-description"><%= toast.description %></p><% } %>
+    </div>
+    <a class="btn btn-ghost btn-icon btn-sm toast-close" href="<%= toast.closeHref || '#' %>" data-toast-close>
+      <%- icon('x', { label: 'Tutup notifikasi' }) %>
+    </a>
+  </div>
+  <% } %>
+</div>
+<% ['success', 'error'].forEach((variant) => { %>
+<template id="toast-template-<%= variant %>">
+  <div class="toast toast-<%= variant %>" role="status">
+    <%- icon(variant === 'error' ? 'circle-alert' : 'circle-check', { size: 18 }) %>
+    <div>
+      <p class="toast-title" data-toast-title></p>
+      <p class="toast-description" data-toast-description></p>
+    </div>
+    <button type="button" class="btn btn-ghost btn-icon btn-sm toast-close" data-toast-close>
+      <%- icon('x', { label: 'Tutup notifikasi' }) %>
+    </button>
+  </div>
+</template>
+<% }) %>

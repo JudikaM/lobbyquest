@@ -1,12 +1,27 @@
   </main>
-  <footer class="site-footer">
-    <div class="wrap">
-      <p>
-        <strong>LobbyQuest</strong> adalah proyek open source berlisensi MIT.
-        Tanpa akun, tanpa iklan, tanpa pelacak.
+  <footer class="app-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <%- include('logo') %>
+        <p>Atur mabar dan nongkrong bareng teman: voting waktu, kunci jadwal, lalu ready check. Tanpa akun, tanpa iklan, tanpa pelacak.</p>
+      </div>
+      <nav aria-label="Tautan lain">
+        <ul class="footer-links">
+          <li><a href="/agenda/baru"><%- icon('calendar-plus') %>Buat agenda</a></li>
+          <li><a href="/desain"><%- icon('palette') %>Sistem desain</a></li>
+          <li><a href="https://github.com/JudikaM/lobbyquest"><%- icon('code-xml') %>Kode sumber</a></li>
+          <li><a href="https://github.com/JudikaM/lobbyquest/security/policy"><%- icon('shield-check') %>Keamanan</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="container">
+      <p class="footer-meta">
+        <span class="kicker">Open source · MIT</span>
+        <span>Ikon oleh Lucide (ISC). Font Geist (OFL).</span>
       </p>
-      <p><a href="https://github.com/JudikaM/lobbyquest">Kode sumber di GitHub</a></p>
     </div>
   </footer>
+  <%- include('toaster') %>
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

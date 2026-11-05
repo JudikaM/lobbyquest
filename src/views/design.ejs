@@ -1,0 +1,275 @@
+<%- include('partials/header', { redesigned: true }) %>
+
+<div class="container ds">
+  <header class="page-header">
+    <p class="kicker"><%- icon('palette') %> Sistem desain</p>
+    <h1 class="page-title">Ready Room</h1>
+    <p class="lead">
+      Fondasi visual LobbyQuest: permukaan netral ala shadcn/ui, satu warna
+      sinyal Volt untuk momen "siap", label HUD monospace, dan ikon Lucide.
+      Halaman ini menampilkan setiap token dan komponen dalam keadaan nyata.
+    </p>
+  </header>
+
+  <div class="ds-layout">
+    <nav class="ds-nav" aria-label="Bagian sistem desain">
+      <ul>
+        <% [['warna','Warna'],['tipografi','Tipografi'],['ikon','Ikon'],['tombol','Tombol'],['form','Form'],['badge','Badge & status'],['umpan-balik','Alert & toast'],['overlay','Dialog, tabs, tooltip'],['data','Avatar & data'],['pola','Pola produk']].forEach(([id, label]) => { %>
+        <li><a href="#<%= id %>"><%= label %></a></li>
+        <% }) %>
+      </ul>
+    </nav>
+
+    <div class="ds-sections">
+      <section class="ds-section" id="warna" aria-labelledby="warna-judul">
+        <h2 class="section-title" id="warna-judul">Warna</h2>
+        <p class="hint">Token semantik mengikuti struktur shadcn/ui. Nilainya berganti otomatis di tema gelap; semua pasangan teks lolos WCAG AA.</p>
+        <div class="ds-swatches">
+          <% swatches.forEach(([token, note]) => { %>
+          <div class="ds-swatch">
+            <span class="ds-swatch-chip swatch-<%= token %>"></span>
+            <span class="ds-swatch-name mono">--<%= token %></span>
+            <span class="ds-swatch-note"><%= note %></span>
+          </div>
+          <% }) %>
+        </div>
+      </section>
+
+      <section class="ds-section" id="tipografi" aria-labelledby="tipografi-judul">
+        <h2 class="section-title" id="tipografi-judul">Tipografi</h2>
+        <p class="hint">Geist untuk teks dan judul, Geist Mono untuk label HUD, angka, dan kode. Keduanya di-subset dan di-host sendiri.</p>
+        <div class="card ds-type">
+          <div class="card-content stack">
+            <p class="ds-type-display">Kumpulkan party-mu.</p>
+            <p class="ds-type-4xl">Push rank Sabtu malam</p>
+            <p class="ds-type-2xl">Hasil voting</p>
+            <p>Teks isi 16px dengan tinggi baris 1,6 agar nyaman dibaca di HP.</p>
+            <p class="hint">Teks pendukung 14px memakai warna muted-foreground.</p>
+            <p class="kicker">Label HUD · Ready check 3/5</p>
+            <p class="mono ds-type-mono">19.00–22.00 WIB · T-02:14:05</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="ds-section" id="ikon" aria-labelledby="ikon-judul">
+        <h2 class="section-title" id="ikon-judul">Ikon</h2>
+        <p class="hint">Semua ikon berasal dari Lucide (set ikon shadcn/ui), dirender sebagai SVG inline dengan currentColor. Ukuran standar 16, 20, dan 24px.</p>
+        <ul class="ds-icons">
+          <% iconNames.forEach((name) => { %>
+          <li><%- icon(name, { size: 20 }) %><span class="mono"><%= name %></span></li>
+          <% }) %>
+        </ul>
+      </section>
+
+      <section class="ds-section" id="tombol" aria-labelledby="tombol-judul">
+        <h2 class="section-title" id="tombol-judul">Tombol</h2>
+        <div class="card"><div class="card-content stack">
+          <div class="btn-row">
+            <button type="button" class="btn btn-brand"><%- icon('zap') %>Brand</button>
+            <button type="button" class="btn btn-primary">Primary</button>
+            <button type="button" class="btn btn-secondary">Secondary</button>
+            <button type="button" class="btn btn-outline">Outline</button>
+            <button type="button" class="btn btn-ghost">Ghost</button>
+            <button type="button" class="btn btn-destructive"><%- icon('trash-2') %>Destructive</button>
+            <button type="button" class="btn btn-link">Link</button>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-brand btn-lg">Buat lobby <%- icon('arrow-right') %></button>
+            <button type="button" class="btn btn-outline">Default</button>
+            <button type="button" class="btn btn-outline btn-sm">Small</button>
+            <button type="button" class="btn btn-outline btn-icon" data-tooltip="Salin tautan"><%- icon('copy', { label: 'Salin tautan' }) %></button>
+            <button type="button" class="btn btn-outline" disabled>Nonaktif</button>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="ds-section" id="form" aria-labelledby="form-judul">
+        <h2 class="section-title" id="form-judul">Form</h2>
+        <div class="card"><div class="card-content ds-form-grid">
+          <div class="field">
+            <label class="label" for="ds-name">Nama panggilan</label>
+            <input class="input" id="ds-name" type="text" placeholder="Contoh: Budi" autocomplete="off">
+            <p class="hint">Terlihat oleh siapa pun yang memiliki tautan.</p>
+          </div>
+          <div class="field">
+            <label class="label" for="ds-place">Lokasi <span class="optional">(opsional)</span></label>
+            <span class="input-wrap"><%- icon('map-pin') %><input class="input" id="ds-place" type="text" placeholder="Discord, atau kafe di Blok M" autocomplete="off"></span>
+          </div>
+          <div class="field">
+            <label class="label" for="ds-title">Judul</label>
+            <input class="input" id="ds-title" type="text" value="ab" aria-invalid="true" aria-describedby="ds-title-error">
+            <p class="field-error" id="ds-title-error"><%- icon('circle-alert') %>Judul minimal 3 karakter.</p>
+          </div>
+          <div class="field">
+            <label class="label" for="ds-zone">Zona waktu</label>
+            <span class="select-wrap">
+              <select class="select" id="ds-zone"><option>WIB (Asia/Jakarta)</option><option>WITA (Asia/Makassar)</option><option>WIT (Asia/Jayapura)</option></select>
+              <%- icon('chevron-down') %>
+            </span>
+          </div>
+          <div class="field ds-span">
+            <label class="label" for="ds-desc">Deskripsi</label>
+            <textarea class="textarea" id="ds-desc" rows="3" placeholder="Bawa headset."></textarea>
+          </div>
+          <fieldset class="field ds-span">
+            <legend class="label">Pilihan</legend>
+            <div class="ds-choices">
+              <label class="choice"><span class="checkbox"><input type="checkbox" checked><%- icon('check') %></span><span class="choice-body"><span class="choice-title">Checkbox aktif</span></span></label>
+              <label class="choice"><span class="checkbox"><input type="checkbox"><%- icon('check') %></span><span class="choice-body"><span class="choice-title">Checkbox</span></span></label>
+              <label class="choice"><span class="radio"><input type="radio" name="ds-radio" checked></span><span class="choice-body"><span class="choice-title">Radio aktif</span></span></label>
+              <label class="choice"><span class="radio"><input type="radio" name="ds-radio"></span><span class="choice-body"><span class="choice-title">Radio</span></span></label>
+            </div>
+          </fieldset>
+          <fieldset class="field ds-span">
+            <legend class="label">Kontrol segmen (ready check)</legend>
+            <div class="segmented">
+              <label class="segment segment-yes"><input type="radio" name="ds-rsvp" checked><%- icon('circle-check') %>Siap</label>
+              <label class="segment segment-maybe"><input type="radio" name="ds-rsvp"><%- icon('circle-help') %>Mungkin</label>
+              <label class="segment segment-no"><input type="radio" name="ds-rsvp"><%- icon('circle-x') %>Absen</label>
+            </div>
+          </fieldset>
+        </div></div>
+      </section>
+
+      <section class="ds-section" id="badge" aria-labelledby="badge-judul">
+        <h2 class="section-title" id="badge-judul">Badge &amp; status</h2>
+        <p class="hint">Status selalu memakai ikon dan label; warna tidak pernah berdiri sendiri.</p>
+        <div class="card"><div class="card-content btn-row">
+          <span class="badge">Default</span>
+          <span class="badge badge-primary">Primary</span>
+          <span class="badge badge-outline">Outline</span>
+          <span class="badge badge-brand"><%- icon('zap') %>Brand</span>
+          <span class="badge badge-info"><span class="dot dot-live"></span>Voting berlangsung</span>
+          <span class="badge badge-ready"><%- icon('circle-check') %>Siap</span>
+          <span class="badge badge-maybe"><%- icon('circle-help') %>Mungkin</span>
+          <span class="badge badge-absent"><%- icon('circle-x') %>Absen</span>
+          <span class="badge badge-afk"><%- icon('hourglass') %>AFK</span>
+        </div></div>
+      </section>
+
+      <section class="ds-section" id="umpan-balik" aria-labelledby="umpan-balik-judul">
+        <h2 class="section-title" id="umpan-balik-judul">Alert &amp; toast</h2>
+        <div class="stack">
+          <%- include('partials/ui/alert', { alert: { variant: 'info', title: 'Informasi', text: 'Siapa pun yang memiliki tautan dapat melihat agenda ini.' } }) %>
+          <%- include('partials/ui/alert', { alert: { variant: 'success', title: 'Pilihanmu tersimpan', text: 'Kamu bisa mengubahnya kapan saja dari browser ini.' } }) %>
+          <%- include('partials/ui/alert', { alert: { variant: 'warning', title: 'Party hampir penuh', text: 'Tinggal 1 slot hadir lagi.' } }) %>
+          <%- include('partials/ui/alert', { alert: { variant: 'destructive', title: 'Agenda belum disimpan', items: ['Judul minimal 3 karakter.', 'Isi 2 sampai 10 pilihan waktu.'] } }) %>
+          <div class="ds-toast-demo">
+            <div class="toast toast-success ds-static-toast">
+              <%- icon('circle-check', { size: 18 }) %>
+              <div>
+                <p class="toast-title">Konfirmasimu tersimpan</p>
+                <p class="toast-description">Teman-temanmu bisa melihat status ready-mu.</p>
+              </div>
+              <span class="btn btn-ghost btn-icon btn-sm toast-close" aria-hidden="true"><%- icon('x') %></span>
+            </div>
+            <button type="button" class="btn btn-outline" data-demo-toast hidden><%- icon('sparkles') %>Tampilkan toast</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="ds-section" id="overlay" aria-labelledby="overlay-judul">
+        <h2 class="section-title" id="overlay-judul">Dialog, tabs, tooltip</h2>
+        <div class="stack">
+          <details class="disclosure" data-dialog>
+            <summary><%- icon('trash-2') %>Buka dialog konfirmasi<%- icon('chevron-down', { className: 'icon-chevron' }) %></summary>
+            <div class="dialog-content" data-dialog-body>
+              <div class="dialog-header">
+                <h3 class="dialog-title" data-dialog-title>Hapus agenda?</h3>
+                <p class="dialog-description">Tanpa JavaScript, isi ini tampil sebagai panel terbuka. Dengan JavaScript, isi ini menjadi dialog modal.</p>
+              </div>
+              <div class="dialog-footer">
+                <button type="button" class="btn btn-outline" data-dialog-close hidden>Batal</button>
+                <button type="button" class="btn btn-destructive" data-dialog-close hidden>Hapus</button>
+              </div>
+            </div>
+          </details>
+
+          <div class="card"><div class="card-content">
+            <div class="tabs" data-tabs>
+              <div class="tabs-list" data-tabs-list hidden></div>
+              <section class="tabs-panel" data-tab-label="Jadwal">
+                <h3 class="tabs-panel-title">Jadwal</h3>
+                <p class="hint">Panel pertama. Tanpa JavaScript, semua panel tampil berurutan.</p>
+              </section>
+              <section class="tabs-panel" data-tab-label="Akses">
+                <h3 class="tabs-panel-title">Akses</h3>
+                <p class="hint">Panel kedua. Tombol panah kiri/kanan berpindah tab.</p>
+              </section>
+              <section class="tabs-panel" data-tab-label="Zona bahaya">
+                <h3 class="tabs-panel-title">Zona bahaya</h3>
+                <p class="hint">Panel ketiga.</p>
+              </section>
+            </div>
+          </div></div>
+
+          <div class="btn-row">
+            <button type="button" class="btn btn-outline btn-icon" data-tooltip="Tooltip di atas"><%- icon('info', { label: 'Info' }) %></button>
+            <button type="button" class="btn btn-outline btn-icon" data-tooltip="Tooltip di bawah" data-tooltip-side="bottom"><%- icon('circle-help', { label: 'Bantuan' }) %></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="ds-section" id="data" aria-labelledby="data-judul">
+        <h2 class="section-title" id="data-judul">Avatar &amp; data</h2>
+        <div class="card"><div class="card-content stack">
+          <div class="btn-row">
+            <% ['A','B','C','D','E','F','G','H'].forEach((letter, i) => { %>
+            <span class="avatar avatar-<%= i %>" aria-hidden="true"><%= letter %></span>
+            <% }) %>
+          </div>
+          <div class="btn-row">
+            <span class="avatar avatar-lg avatar-0" aria-hidden="true">A<span class="avatar-status status-yes"><%- icon('check') %></span></span>
+            <span class="avatar avatar-lg avatar-3" aria-hidden="true">B<span class="avatar-status status-maybe"><%- icon('circle-help') %></span></span>
+            <span class="avatar avatar-lg avatar-6" aria-hidden="true">C<span class="avatar-status status-no"><%- icon('x') %></span></span>
+            <span class="avatar-stack" aria-label="5 pemain">
+              <span class="avatar avatar-sm avatar-0">A</span><span class="avatar avatar-sm avatar-2">B</span><span class="avatar avatar-sm avatar-4">C</span><span class="avatar avatar-sm avatar-more">+2</span>
+            </span>
+          </div>
+          <div class="ds-bars">
+            <p class="kicker">Bar hasil voting (sorotan + netral)</p>
+            <span class="bar"><span class="bar-value is-lead w-84"></span></span>
+            <span class="bar"><span class="bar-value w-50"></span></span>
+            <span class="bar"><span class="bar-value w-16"></span></span>
+            <p class="kicker">Segmented bar ready check</p>
+            <span class="segbar" role="img" aria-label="3 siap, 1 mungkin, 1 absen, 1 AFK"><span class="seg-yes g-3"></span><span class="seg-maybe g-1"></span><span class="seg-no g-1"></span><span class="seg-pending g-1"></span></span>
+            <p class="kicker">Progress</p>
+            <span class="progress" role="img" aria-label="60 persen"><span class="progress-value w-60"></span></span>
+            <p class="kicker">Skeleton</p>
+            <span class="skeleton ds-skeleton-line"></span>
+            <span class="skeleton ds-skeleton-line ds-skeleton-short"></span>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="ds-section" id="pola" aria-labelledby="pola-judul">
+        <h2 class="section-title" id="pola-judul">Pola produk</h2>
+        <div class="stack">
+          <div class="card"><div class="card-content">
+            <ol class="quest" aria-label="Tahapan agenda">
+              <li class="quest-step is-done"><span class="quest-node"><%- icon('check') %></span>Voting</li>
+              <li class="quest-step is-current" aria-current="step"><span class="quest-node"><%- icon('lock') %></span>Jadwal dikunci</li>
+              <li class="quest-step"><span class="quest-node"><%- icon('flag') %></span>Selesai</li>
+            </ol>
+          </div></div>
+          <div class="stats stats-4">
+            <div class="stat stat-yes"><span class="stat-label"><%- icon('circle-check') %>Siap</span><span class="stat-value">3</span></div>
+            <div class="stat stat-maybe"><span class="stat-label"><%- icon('circle-help') %>Mungkin</span><span class="stat-value">1</span></div>
+            <div class="stat stat-no"><span class="stat-label"><%- icon('circle-x') %>Absen</span><span class="stat-value">1</span></div>
+            <div class="stat stat-pending"><span class="stat-label"><%- icon('hourglass') %>AFK</span><span class="stat-value">1</span></div>
+          </div>
+          <label class="option-card">
+            <%- include('partials/ui/date-tile', { tile: { weekday: 'Sab', day: '7', month: 'Nov' } }) %>
+            <span class="option-time"><span class="option-time-range">19.00–22.00 WIB</span><span class="option-time-date">Sabtu, 7 November 2026</span></span>
+            <span class="checkbox"><input type="checkbox" checked><%- icon('check') %></span>
+          </label>
+          <%- include('partials/ui/empty', { empty: { icon: 'users', title: 'Lobby masih kosong', text: 'Bagikan tautan agenda supaya teman-temanmu bisa gabung dan memilih waktu.' } }) %>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/desain.js"></script>
+
+<%- include('partials/footer') %>

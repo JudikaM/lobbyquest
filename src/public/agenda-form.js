@@ -59,4 +59,3 @@ if (timezoneSelect) {
 
 refresh();
 
-document.querySelector('[data-focus-on-load]')?.focus();
