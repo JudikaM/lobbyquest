@@ -7,6 +7,7 @@ const { csrfProtection } = require('./security/csrf');
 const { requireFormBody } = require('./security/body');
 const { createLimiters } = require('./security/rate-limit');
 const { publicOrigin } = require('./urls');
+const { icon } = require('./ui/icons');
 
 // Membuat aplikasi Express tanpa langsung mendengarkan port, sehingga bisa
 // dipakai oleh server maupun test. `rateLimits` menimpa batas bawaan
@@ -17,6 +18,8 @@ function createApp({ config = loadConfig(), rateLimits } = {}) {
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, 'views'));
   app.set('config', config);
+  // Helper tampilan yang tersedia di semua template.
+  app.locals.icon = icon;
   app.disable('x-powered-by');
   // Menentukan dari mana req.ip dan req.secure dibaca saat berada di
   // belakang reverse proxy. Bawaan: tidak memercayai X-Forwarded-*.
