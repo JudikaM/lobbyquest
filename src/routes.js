@@ -3,6 +3,7 @@ const agendas = require('./agendas');
 const votes = require('./votes');
 const participants = require('./participants');
 const managers = require('./managers');
+const rsvp = require('./rsvp');
 const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, formatDate, utcToLocalInput } = require('./time');
 const { readCookie, cookieOptions } = require('./security/cookies');
 const { publicOrigin } = require('./urls');
@@ -62,7 +63,22 @@ function renderManageLogin(res, agenda, { error } = {}) {
   res.render('manage-login', { title: `Kelola ${agenda.title}`, noindex: true, agenda, error });
 }
 
-function renderAgenda(req, res, agenda, { voteValues, voteErrors = [], manageErrors = [] } = {}) {
+function setParticipantCookie(req, res, slug, token) {
+  // Cookie hanya dikirim ke halaman agenda ini dan tidak bisa dibaca
+  // JavaScript. SameSite=Lax mencegah situs lain mengubah suara peserta.
+  res.cookie(participants.COOKIE, token, cookieOptions(req, {
+    path: `/a/${slug}`,
+    maxAge: participants.COOKIE_MAX_AGE,
+  }));
+}
+
+function participantLimitMessage() {
+  return `Agenda ini sudah mencapai batas ${participants.MAX_PARTICIPANTS} peserta.`;
+}
+
+function renderAgenda(req, res, agenda, {
+  voteValues, voteErrors = [], manageErrors = [], rsvpValues, rsvpErrors = [],
+} = {}) {
   const participant = findCurrentParticipant(req, agenda);
   const manager = managerToken(req, agenda);
   const origin = publicOrigin(req);
@@ -117,6 +133,14 @@ function renderAgenda(req, res, agenda, { voteValues, voteErrors = [], manageErr
     managerWelcome: req.query.kelola === '1',
     finalSaved: req.query.ditetapkan === '1',
     manageErrors,
+    rsvpLabels: rsvp.RSVP_LABELS,
+    rsvpSummary: rsvp.rsvpSummary(agenda.id),
+    rsvpValues: rsvpValues || {
+      name: participant ? participant.name : '',
+      status: participant ? participant.rsvp || '' : '',
+    },
+    rsvpErrors,
+    rsvpSaved: req.query.hadir === '1',
     justCreated: req.query.baru === '1',
     voteSaved: req.query.tersimpan === '1',
     privacyNotice: PRIVACY_NOTICE,
@@ -244,19 +268,43 @@ function createRouter(limiters) {
       res.status(409);
       return renderAgenda(req, res, agenda, {
         voteValues: values,
-        voteErrors: [`Agenda ini sudah mencapai batas ${participants.MAX_PARTICIPANTS} peserta.`],
+        voteErrors: [participantLimitMessage()],
       });
     }
 
-    if (newToken) {
-      // Cookie hanya dikirim ke halaman agenda ini dan tidak bisa dibaca
-      // JavaScript. SameSite=Lax mencegah situs lain mengubah suara peserta.
-      res.cookie(participants.COOKIE, newToken, cookieOptions(req, {
-        path: `/a/${agenda.slug}`,
-        maxAge: participants.COOKIE_MAX_AGE,
-      }));
-    }
+    if (newToken) setParticipantCookie(req, res, agenda.slug, newToken);
     res.redirect(303, `/a/${agenda.slug}?tersimpan=1#suara`);
+  });
+
+  router.post('/a/:slug/hadir', limiters.participate, (req, res) => {
+    const { agenda } = req;
+    if (agenda.status !== 'scheduled') {
+      res.status(409);
+      return renderAgenda(req, res, agenda, {
+        rsvpErrors: ['Konfirmasi kehadiran hanya dibuka setelah waktu final ditetapkan dan sebelum agenda selesai.'],
+      });
+    }
+
+    const { values, errors } = rsvp.validateRsvp(req.body);
+    if (errors.length) {
+      res.status(422);
+      return renderAgenda(req, res, agenda, { rsvpValues: values, rsvpErrors: errors });
+    }
+
+    let newToken;
+    try {
+      newToken = rsvp.saveRsvp(agenda, findCurrentParticipant(req, agenda), values);
+    } catch (error) {
+      if (error.code !== 'PARTICIPANT_LIMIT') throw error;
+      res.status(409);
+      return renderAgenda(req, res, agenda, {
+        rsvpValues: values,
+        rsvpErrors: [participantLimitMessage()],
+      });
+    }
+
+    if (newToken) setParticipantCookie(req, res, agenda.slug, newToken);
+    res.redirect(303, `/a/${agenda.slug}?hadir=1#hadir`);
   });
 
   return router;
