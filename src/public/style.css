@@ -1237,6 +1237,33 @@ input[type="radio"] {
   margin: 0;
 }
 
+/* Berbagi. */
+.copy-field {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.copy-field input {
+  flex: 1;
+}
+
+.copy-status {
+  min-height: 1.4em;
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--ready);
+}
+
+.share-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.share-buttons .button {
+  flex: 1 1 8rem;
+}
+
 /* Pengelola. */
 .manage {
   border-style: dashed;
