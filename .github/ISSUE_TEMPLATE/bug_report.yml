@@ -1,0 +1,43 @@
+name: Laporan bug
+description: Ada yang tidak berjalan sebagaimana mestinya.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Terima kasih sudah melapor. Jangan menyertakan tautan agenda asli, kode
+        pengelola, cookie, atau data pribadi. Celah keamanan dilaporkan lewat
+        [Security Advisories](https://github.com/JudikaM/lobbyquest/security/advisories/new).
+  - type: textarea
+    id: what
+    attributes:
+      label: Apa yang terjadi?
+      description: Jelaskan masalahnya dengan singkat.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Langkah reproduksi
+      placeholder: |
+        1. Buka halaman ...
+        2. Klik ...
+        3. Muncul ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Yang seharusnya terjadi
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Perangkat dan browser
+      placeholder: Contoh. Android 15, Chrome 140
+  - type: input
+    id: version
+    attributes:
+      label: Versi atau commit
+      placeholder: Contoh. main @ abc1234
