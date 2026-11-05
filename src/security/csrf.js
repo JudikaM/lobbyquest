@@ -30,13 +30,18 @@ function render403(res) {
 
 // Asal request harus situs ini sendiri. Browser modern mengirim
 // Sec-Fetch-Site dan Origin; jika ada dan tidak cocok, request ditolak.
+//
+// Origin "null" tidak dianggap lintas situs: browser mengirim nilai itu
+// untuk POST dari halaman sendiri karena aplikasi memakai
+// Referrer-Policy: no-referrer. Halaman lain (misalnya iframe sandbox)
+// tetap tertolak lewat Sec-Fetch-Site, dan token bertanda tangan selalu
+// wajib cocok.
 function sameOrigin(req, config) {
   const site = req.get('sec-fetch-site');
   if (site && site !== 'same-origin' && site !== 'none') return false;
 
   const origin = req.get('origin');
-  if (!origin) return true;
-  if (origin === 'null') return false;
+  if (!origin || origin === 'null') return true;
   try {
     const { host } = new URL(origin);
     if (config.publicUrl) return origin === config.publicUrl;
