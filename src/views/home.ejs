@@ -1,78 +1,128 @@
-<%- include('partials/header') %>
+<%- include('partials/header', { redesigned: true }) %>
 
-<% if (deleted) { %>
-<p class="flash flash-success" role="status">Agenda sudah dihapus permanen.</p>
-<% } %>
-
-<section class="hero">
-  <div class="hero-copy">
-    <p class="eyebrow">Tanpa akun · Gratis · Open source</p>
-    <h1>Kumpulkan party-mu, tanpa drama jadwal.</h1>
-    <p class="lead">
-      Buat agenda mabar atau nongkrong, bagikan tautannya ke grup, biarkan teman
-      memilih waktu yang cocok, lalu tetapkan jadwal dan cek siapa yang siap.
-    </p>
-    <div class="hero-actions">
-      <a class="button button-primary button-large" href="/agenda/baru">Buat agenda</a>
-      <a class="button button-ghost" href="#cara-kerja">Lihat cara kerjanya</a>
+<section class="hero" aria-labelledby="hero-judul">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <p class="badge badge-outline hero-badge"><span class="dot dot-live hero-dot"></span>Open source · Tanpa akun · Gratis</p>
+      <h1 class="hero-title" id="hero-judul">Kumpulkan <span class="hl">party-mu</span>, tanpa drama jadwal.</h1>
+      <p class="lead hero-lead">
+        Buat lobby untuk mabar atau nongkrong. Teman memilih waktu langsung dari
+        grup chat, kamu kunci jadwalnya, lalu semua menjawab <strong>ready check</strong>.
+      </p>
+      <div class="btn-row hero-actions">
+        <a class="btn btn-brand btn-lg" href="/agenda/baru">Buat lobby <%- icon('arrow-right') %></a>
+        <a class="btn btn-outline btn-lg" href="#cara-kerja">Lihat cara kerja</a>
+      </div>
+      <ul class="hero-trust">
+        <li><%- icon('user-x') %>Tanpa daftar akun</li>
+        <li><%- icon('shield-check') %>Tanpa pelacak</li>
+        <li><%- icon('timer') %>Siap dalam semenit</li>
+      </ul>
     </div>
-  </div>
-
-  <div class="hero-demo" aria-hidden="true">
-    <div class="demo-card">
-      <p class="demo-kicker">Lobby · Mabar</p>
-      <p class="demo-title">Push rank Sabtu malam</p>
-      <div class="demo-bars">
-        <p><span>Sab 19.00</span><span class="bar"><span class="bar-fill fill-10"></span></span><b>5</b></p>
-        <p><span>Sab 21.00</span><span class="bar"><span class="bar-fill fill-6"></span></span><b>3</b></p>
-        <p><span>Min 20.00</span><span class="bar"><span class="bar-fill fill-2"></span></span><b>1</b></p>
-      </div>
-      <div class="demo-party">
-        <span class="avatar avatar-0">A</span>
-        <span class="avatar avatar-3">B</span>
-        <span class="avatar avatar-5">C</span>
-        <span class="avatar avatar-6">D</span>
-        <span class="avatar avatar-2">E</span>
-      </div>
-      <p class="demo-ready">Ready check: 4 siap · 1 mungkin</p>
+    <div class="hero-visual">
+      <%- include('partials/hero-art') %>
     </div>
   </div>
 </section>
 
-<section class="quest-log" id="cara-kerja" aria-labelledby="cara-kerja-judul">
-  <h2 id="cara-kerja-judul" class="section-title">Cara kerjanya</h2>
-  <ol class="quest-steps">
-    <li>
-      <span class="quest-number">1</span>
-      <h3>Buat agenda</h3>
-      <p>Tulis judul dan beberapa pilihan waktu. Tidak perlu daftar akun.</p>
-    </li>
-    <li>
-      <span class="quest-number">2</span>
-      <h3>Bagikan tautan</h3>
-      <p>Kirim ke grup WhatsApp, Discord, atau Telegram dengan sekali ketuk.</p>
-    </li>
-    <li>
-      <span class="quest-number">3</span>
-      <h3>Teman memilih waktu</h3>
-      <p>Setiap orang mencentang waktu yang bisa. Hasilnya langsung terlihat.</p>
-    </li>
-    <li>
-      <span class="quest-number">4</span>
-      <h3>Tetapkan &amp; ready check</h3>
-      <p>Pilih waktu final, lalu teman mengonfirmasi hadir, mungkin, atau tidak.</p>
-    </li>
-  </ol>
+<section class="section" id="cara-kerja" aria-labelledby="cara-kerja-judul">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker"><%- icon('list-checks') %> Quest log</p>
+      <h2 class="section-title" id="cara-kerja-judul">Dari ajakan sampai semua siap, dalam empat langkah.</h2>
+    </div>
+    <ol class="steps">
+      <% steps.forEach((step, i) => { %>
+      <li class="step">
+        <span class="step-top">
+          <span class="step-icon"><%- icon(step.icon, { size: 20 }) %></span>
+          <span class="step-num mono">0<%= i + 1 %></span>
+        </span>
+        <h3 class="step-title"><%= step.title %></h3>
+        <p class="step-text"><%= step.text %></p>
+      </li>
+      <% }) %>
+    </ol>
+  </div>
 </section>
 
-<section class="perks" aria-labelledby="privasi-judul">
-  <h2 id="privasi-judul" class="section-title">Privasi bawaan</h2>
-  <ul class="perk-list">
-    <li><strong>Tanpa akun dan email.</strong> Peserta cukup menulis nama panggilan.</li>
-    <li><strong>Tanpa pelacak.</strong> Tidak ada analytics, iklan, atau font dari pihak ketiga.</li>
-    <li><strong>Data dihapus otomatis.</strong> Agenda lama terhapus sendiri setelah beberapa minggu.</li>
-    <li><strong>Kamu yang pegang kendali.</strong> Peserta bisa menghapus namanya, pembuat bisa menghapus agenda.</li>
-  </ul>
+<section class="section" aria-labelledby="fitur-judul">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker"><%- icon('sparkles') %> Fitur</p>
+      <h2 class="section-title" id="fitur-judul">Semua yang dibutuhkan party, tanpa yang tidak perlu.</h2>
+    </div>
+    <div class="bento">
+      <article class="card bento-tile bento-wide">
+        <div class="card-content bento-body">
+          <span class="bento-icon"><%- icon('check-check', { size: 20 }) %></span>
+          <h3 class="bento-title">Ready check yang jelas</h3>
+          <p class="hint">Setelah jadwal dikunci, setiap orang menjawab siap, mungkin, atau absen. Yang belum menjawab tampil sebagai AFK.</p>
+          <div class="bento-demo" aria-hidden="true">
+            <div class="btn-row">
+              <span class="badge badge-ready"><%- icon('circle-check') %>Siap 4</span>
+              <span class="badge badge-maybe"><%- icon('circle-help') %>Mungkin 1</span>
+              <span class="badge badge-afk"><%- icon('hourglass') %>AFK 1</span>
+            </div>
+            <span class="segbar"><span class="seg-yes g-4"></span><span class="seg-maybe g-1"></span><span class="seg-pending g-1"></span></span>
+          </div>
+        </div>
+      </article>
+      <article class="card bento-tile">
+        <div class="card-content bento-body">
+          <span class="bento-icon"><%- icon('vote', { size: 20 }) %></span>
+          <h3 class="bento-title">Voting waktu langsung</h3>
+          <p class="hint">Bar ketersediaan menunjukkan waktu yang paling cocok untuk semua.</p>
+          <div class="bento-demo bento-bars" aria-hidden="true">
+            <span class="bar"><span class="bar-value is-lead w-90"></span></span>
+            <span class="bar"><span class="bar-value w-54"></span></span>
+            <span class="bar"><span class="bar-value w-18"></span></span>
+          </div>
+        </div>
+      </article>
+      <article class="card bento-tile">
+        <div class="card-content bento-body">
+          <span class="bento-icon"><%- icon('users', { size: 20 }) %></span>
+          <h3 class="bento-title">Kuota party</h3>
+          <p class="hint">Batasi yang bisa konfirmasi hadir, misalnya 5 untuk satu squad.</p>
+        </div>
+      </article>
+      <article class="card bento-tile">
+        <div class="card-content bento-body">
+          <span class="bento-icon"><%- icon('calendar-check', { size: 20 }) %></span>
+          <h3 class="bento-title">Masuk ke kalender</h3>
+          <p class="hint">Simpan jadwal final sebagai file .ics atau langsung ke Google Calendar.</p>
+        </div>
+      </article>
+      <article class="card bento-tile">
+        <div class="card-content bento-body">
+          <span class="bento-icon"><%- icon('globe', { size: 20 }) %></span>
+          <h3 class="bento-title">Zona waktu otomatis</h3>
+          <p class="hint">WIB, WITA, dan WIT, plus jam versi perangkat untuk teman di zona lain.</p>
+        </div>
+      </article>
+      <article class="card bento-tile">
+        <div class="card-content bento-body">
+          <span class="bento-icon"><%- icon('shield-check', { size: 20 }) %></span>
+          <h3 class="bento-title">Privasi bawaan</h3>
+          <p class="hint">Tanpa akun dan pelacak. Agenda lama terhapus otomatis, peserta bisa menghapus namanya.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="cta-judul">
+  <div class="container">
+    <div class="cta-band">
+      <div class="cta-copy">
+        <p class="kicker cta-kicker"><%- icon('gamepad-2') %> Siap main?</p>
+        <h2 class="cta-title" id="cta-judul">Party-mu sudah menunggu.</h2>
+        <p class="cta-text">Buat lobby pertama sekarang. Tidak perlu akun, cukup bagikan tautannya.</p>
+      </div>
+      <a class="btn btn-brand btn-lg" href="/agenda/baru"><%- icon('plus') %>Buat lobby</a>
+    </div>
+  </div>
 </section>
 
 <%- include('partials/footer') %>
