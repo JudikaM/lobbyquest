@@ -1,26 +1,78 @@
 <%- include('partials/header') %>
 
 <% if (deleted) { %>
-<p class="success" role="status">Agenda sudah dihapus permanen.</p>
+<p class="flash flash-success" role="status">Agenda sudah dihapus permanen.</p>
 <% } %>
 
 <section class="hero">
-  <h1>LobbyQuest</h1>
-  <p class="lead">
-    Atur jadwal mabar dan nongkrong bareng teman tanpa ribet.
-  </p>
-  <a class="primary-button" href="/agenda/baru">Buat agenda</a>
+  <div class="hero-copy">
+    <p class="eyebrow">Tanpa akun · Gratis · Open source</p>
+    <h1>Kumpulkan party-mu, tanpa drama jadwal.</h1>
+    <p class="lead">
+      Buat agenda mabar atau nongkrong, bagikan tautannya ke grup, biarkan teman
+      memilih waktu yang cocok, lalu tetapkan jadwal dan cek siapa yang siap.
+    </p>
+    <div class="hero-actions">
+      <a class="button button-primary button-large" href="/agenda/baru">Buat agenda</a>
+      <a class="button button-ghost" href="#cara-kerja">Lihat cara kerjanya</a>
+    </div>
+  </div>
+
+  <div class="hero-demo" aria-hidden="true">
+    <div class="demo-card">
+      <p class="demo-kicker">Lobby · Mabar</p>
+      <p class="demo-title">Push rank Sabtu malam</p>
+      <div class="demo-bars">
+        <p><span>Sab 19.00</span><span class="bar"><span class="bar-fill fill-10"></span></span><b>5</b></p>
+        <p><span>Sab 21.00</span><span class="bar"><span class="bar-fill fill-6"></span></span><b>3</b></p>
+        <p><span>Min 20.00</span><span class="bar"><span class="bar-fill fill-2"></span></span><b>1</b></p>
+      </div>
+      <div class="demo-party">
+        <span class="avatar avatar-0">A</span>
+        <span class="avatar avatar-3">B</span>
+        <span class="avatar avatar-5">C</span>
+        <span class="avatar avatar-6">D</span>
+        <span class="avatar avatar-2">E</span>
+      </div>
+      <p class="demo-ready">Ready check: 4 siap · 1 mungkin</p>
+    </div>
+  </div>
 </section>
 
-<section class="steps">
-  <h2>Cara kerjanya</h2>
-  <ol>
-    <li><strong>Buat agenda</strong> dan tulis beberapa pilihan waktu.</li>
-    <li><strong>Bagikan link</strong> supaya teman bisa memilih waktu yang cocok.</li>
-    <li><strong>Tetapkan waktu</strong> setelah suara terkumpul.</li>
-    <li><strong>Konfirmasi kehadiran</strong> agar semua tahu siapa yang ikut.</li>
+<section class="quest-log" id="cara-kerja" aria-labelledby="cara-kerja-judul">
+  <h2 id="cara-kerja-judul" class="section-title">Cara kerjanya</h2>
+  <ol class="quest-steps">
+    <li>
+      <span class="quest-number">1</span>
+      <h3>Buat agenda</h3>
+      <p>Tulis judul dan beberapa pilihan waktu. Tidak perlu daftar akun.</p>
+    </li>
+    <li>
+      <span class="quest-number">2</span>
+      <h3>Bagikan tautan</h3>
+      <p>Kirim ke grup WhatsApp, Discord, atau Telegram dengan sekali ketuk.</p>
+    </li>
+    <li>
+      <span class="quest-number">3</span>
+      <h3>Teman memilih waktu</h3>
+      <p>Setiap orang mencentang waktu yang bisa. Hasilnya langsung terlihat.</p>
+    </li>
+    <li>
+      <span class="quest-number">4</span>
+      <h3>Tetapkan &amp; ready check</h3>
+      <p>Pilih waktu final, lalu teman mengonfirmasi hadir, mungkin, atau tidak.</p>
+    </li>
   </ol>
-  <p class="note">Penetapan waktu dan konfirmasi kehadiran sedang dibangun. Tidak perlu akun untuk memakainya.</p>
+</section>
+
+<section class="perks" aria-labelledby="privasi-judul">
+  <h2 id="privasi-judul" class="section-title">Privasi bawaan</h2>
+  <ul class="perk-list">
+    <li><strong>Tanpa akun dan email.</strong> Peserta cukup menulis nama panggilan.</li>
+    <li><strong>Tanpa pelacak.</strong> Tidak ada analytics, iklan, atau font dari pihak ketiga.</li>
+    <li><strong>Data dihapus otomatis.</strong> Agenda lama terhapus sendiri setelah beberapa minggu.</li>
+    <li><strong>Kamu yang pegang kendali.</strong> Peserta bisa menghapus namanya, pembuat bisa menghapus agenda.</li>
+  </ul>
 </section>
 
 <%- include('partials/footer') %>

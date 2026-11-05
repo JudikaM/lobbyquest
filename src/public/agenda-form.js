@@ -28,3 +28,5 @@ slots.addEventListener('click', (event) => {
 });
 
 refresh();
+
+document.querySelector('[data-focus-on-load]')?.focus();
