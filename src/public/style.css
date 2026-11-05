@@ -1,87 +1,47 @@
-/* LobbyQuest — gaya "lobby game" yang tetap bersih dan ramah pemula.
-   Mobile-first, mengikuti tema terang/gelap perangkat, tanpa framework. */
-
-@font-face {
-  font-family: "Chakra Petch";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("/fonts/chakra-petch-latin-600-normal.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Chakra Petch";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("/fonts/chakra-petch-latin-700-normal.woff2") format("woff2");
-}
-
-/* ---------- Token ---------- */
+/* Gaya lama (sementara). Halaman yang belum dirancang ulang masih memakai
+   kelas di file ini; nilainya kini diambil dari token di app.css. File ini
+   dihapus setelah semua halaman pindah ke sistem desain baru. */
 
 :root {
-  color-scheme: light dark;
+  --font-body: var(--font-sans);
+  --font-display: var(--font-sans);
 
-  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
-  --font-display: "Chakra Petch", var(--font-body);
+  --bg: var(--background);
+  --surface: var(--card);
+  --surface-2: var(--muted);
+  --ink: var(--foreground);
+  --ink-muted: var(--muted-foreground);
+  --line: var(--border);
+  --line-strong: var(--input);
 
-  --bg: #f4f1ea;
-  --bg-grid: rgb(27 29 38 / 4%);
-  --surface: #ffffff;
-  --surface-2: #f0ebe0;
-  --ink: #1b1d26;
-  --ink-muted: #545868;
-  --line: #ddd6c7;
-  --line-strong: #c4bba8;
+  --no: var(--absent-text);
+  --no-bg: var(--absent-soft);
+  --maybe-bg: var(--maybe-soft);
+  --ready-bg: var(--ready-soft);
+  --info-bg: var(--info-soft);
 
-  --accent: #ffb547;
-  --accent-strong: #e8961a;
-  --accent-ink: #8a5300;
-  --on-accent: #1b1d26;
-
-  --ready: #12704f;
-  --ready-bg: #dcf3e9;
-  --maybe: #7d5200;
-  --maybe-bg: #fbedcc;
-  --no: #a8261d;
-  --no-bg: #fbe1de;
-  --info-bg: #e6edff;
-  --info: #2347a8;
-
-  --focus: #2f6bff;
-  --shadow: 0 1px 0 rgb(27 29 38 / 6%), 0 8px 24px -12px rgb(27 29 38 / 18%);
-  --radius: 14px;
-  --radius-small: 9px;
+  --focus: var(--ring);
+  --shadow: var(--shadow-sm);
+  --radius-small: var(--radius-md);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0e111a;
-    --bg-grid: rgb(255 255 255 / 3%);
-    --surface: #161b28;
-    --surface-2: #1e2536;
-    --ink: #eef1f7;
-    --ink-muted: #a6aec0;
-    --line: #2a3247;
-    --line-strong: #3a4560;
+/* Warna status lama memakai nilai teks dari token status baru. */
+.rsvp-yes,
+.segment-yes:has(input:checked),
+.party-rsvp.rsvp-yes,
+.copy-status,
+.party-slots.is-full,
+.demo-ready {
+  --ready: var(--ready-text);
+}
 
-    --accent: #ffb547;
-    --accent-strong: #ffc76e;
-    --accent-ink: #ffc76e;
-    --on-accent: #1b1d26;
+.rsvp-maybe,
+.segment-maybe:has(input:checked) {
+  --maybe: var(--maybe-text);
+}
 
-    --ready: #5fdcae;
-    --ready-bg: rgb(95 220 174 / 13%);
-    --maybe: #ffd27a;
-    --maybe-bg: rgb(255 210 122 / 13%);
-    --no: #ff8a80;
-    --no-bg: rgb(255 138 128 / 13%);
-    --info-bg: rgb(122 162 255 / 14%);
-    --info: #a9c1ff;
-
-    --focus: #8fb0ff;
-    --shadow: 0 1px 0 rgb(0 0 0 / 30%), 0 10px 30px -14px rgb(0 0 0 / 60%);
-  }
+.status-voting {
+  --info: var(--info-text);
 }
 
 /* ---------- Dasar ---------- */
@@ -107,10 +67,6 @@ body {
   line-height: 1.6;
   color: var(--ink);
   background-color: var(--bg);
-  background-image:
-    linear-gradient(var(--bg-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
-  background-size: 28px 28px;
 }
 
 main {
@@ -148,7 +104,7 @@ p {
 }
 
 a {
-  color: var(--accent-ink);
+  color: var(--brand-text);
   text-underline-offset: 0.18em;
 }
 
@@ -247,7 +203,7 @@ img {
 }
 
 .header-cta:hover {
-  border-color: var(--accent-strong);
+  border-color: var(--brand-hover);
 }
 
 .site-footer {
@@ -276,7 +232,7 @@ img {
 
 .eyebrow {
   font-size: 0.8rem;
-  color: var(--accent-ink);
+  color: var(--brand-text);
   margin-bottom: 0.4rem;
 }
 
@@ -404,19 +360,19 @@ small {
 }
 
 .button-primary {
-  color: var(--on-accent);
-  background: var(--accent);
-  border-color: var(--accent-strong);
-  box-shadow: 0 4px 0 var(--accent-strong);
+  color: var(--brand-foreground);
+  background: var(--brand);
+  border-color: var(--brand-hover);
+  box-shadow: 0 4px 0 var(--brand-hover);
 }
 
 .button-primary:hover {
-  background: color-mix(in srgb, var(--accent) 88%, white);
+  background: color-mix(in srgb, var(--brand) 88%, white);
 }
 
 .button-primary:active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--accent-strong);
+  box-shadow: 0 1px 0 var(--brand-hover);
 }
 
 .button-secondary {
@@ -469,7 +425,7 @@ small {
   min-height: 2.75rem;
   font: inherit;
   font-size: 0.92rem;
-  color: var(--accent-ink);
+  color: var(--brand-text);
   background: none;
   border: 0;
   text-decoration: underline;
@@ -530,7 +486,7 @@ textarea {
 input:hover,
 select:hover,
 textarea:hover {
-  border-color: color-mix(in srgb, var(--accent-strong) 55%, var(--line-strong));
+  border-color: color-mix(in srgb, var(--brand-hover) 55%, var(--line-strong));
 }
 
 input:focus-visible,
@@ -561,7 +517,7 @@ input[type="radio"] {
   height: 1.25rem;
   margin: 0;
   flex: none;
-  accent-color: var(--accent-strong);
+  accent-color: var(--brand-hover);
 }
 
 /* Pilihan jenis agenda sebagai kartu besar. */
@@ -589,8 +545,8 @@ input[type="radio"] {
 }
 
 .kind-option:has(input:checked) {
-  border-color: var(--accent-strong);
-  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border-color: var(--brand-hover);
+  background: color-mix(in srgb, var(--brand) 14%, var(--surface));
 }
 
 .kind-option:has(input:focus-visible) {
@@ -647,7 +603,7 @@ input[type="radio"] {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--accent-ink);
+  color: var(--brand-text);
 }
 
 .slot-remove {
@@ -673,8 +629,8 @@ input[type="radio"] {
 }
 
 .toggle-row:has(input:checked) {
-  border-color: var(--accent-strong);
-  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  border-color: var(--brand-hover);
+  background: color-mix(in srgb, var(--brand) 12%, var(--surface));
 }
 
 .toggle-row.is-disabled {
@@ -772,7 +728,7 @@ input[type="radio"] {
 
 .demo-kicker {
   font-size: 0.75rem;
-  color: var(--accent-ink);
+  color: var(--brand-text);
   margin-bottom: 0.2rem;
 }
 
@@ -850,7 +806,7 @@ input[type="radio"] {
   height: 2rem;
   font-family: var(--font-display);
   font-weight: 700;
-  color: var(--on-accent);
+  color: var(--brand-foreground);
 }
 
 /* Bentuk wajik sebagai latar, angka tetap tegak. */
@@ -859,7 +815,7 @@ input[type="radio"] {
   position: absolute;
   inset: 0.2rem;
   z-index: -1;
-  background: var(--accent);
+  background: var(--brand);
   border-radius: 6px;
   transform: rotate(45deg);
 }
@@ -874,7 +830,7 @@ input[type="radio"] {
 
 .perk-list li {
   padding: 0.8rem 1rem;
-  border-left: 4px solid var(--accent);
+  border-left: 4px solid var(--brand);
   background: var(--surface);
   border-radius: 0 var(--radius-small) var(--radius-small) 0;
 }
@@ -987,18 +943,18 @@ input[type="radio"] {
 }
 
 .status-steps .is-done {
-  border-top-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  border-top-color: color-mix(in srgb, var(--brand) 55%, var(--line));
 }
 
 .status-steps .is-current {
   color: var(--ink);
-  border-top-color: var(--accent-strong);
+  border-top-color: var(--brand-hover);
 }
 
 .final-time {
-  border: 2px solid var(--accent-strong);
+  border: 2px solid var(--brand-hover);
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--accent) 20%, var(--surface)), var(--surface));
+    linear-gradient(135deg, color-mix(in srgb, var(--brand) 20%, var(--surface)), var(--surface));
 }
 
 .final-done {
@@ -1029,8 +985,8 @@ input[type="radio"] {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.9rem;
-  color: var(--on-accent);
-  background: var(--accent);
+  color: var(--brand-foreground);
+  background: var(--brand);
   border-radius: 999px;
 }
 
@@ -1077,12 +1033,12 @@ input[type="radio"] {
 }
 
 .time-option.is-top {
-  border-color: color-mix(in srgb, var(--accent-strong) 60%, var(--line));
+  border-color: color-mix(in srgb, var(--brand-hover) 60%, var(--line));
 }
 
 .time-option.is-final {
-  border: 2px solid var(--accent-strong);
-  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  border: 2px solid var(--brand-hover);
+  background: color-mix(in srgb, var(--brand) 10%, var(--surface));
 }
 
 .time-option-head {
@@ -1098,15 +1054,15 @@ input[type="radio"] {
 }
 
 .tag-top {
-  color: var(--accent-ink);
-  border-color: color-mix(in srgb, var(--accent-strong) 50%, transparent);
-  background: color-mix(in srgb, var(--accent) 15%, var(--surface));
+  color: var(--brand-text);
+  border-color: color-mix(in srgb, var(--brand-hover) 50%, transparent);
+  background: color-mix(in srgb, var(--brand) 15%, var(--surface));
 }
 
 .tag-final {
-  color: var(--on-accent);
-  background: var(--accent);
-  border-color: var(--accent-strong);
+  color: var(--brand-foreground);
+  background: var(--brand);
+  border-color: var(--brand-hover);
 }
 
 .bar {
@@ -1122,7 +1078,7 @@ input[type="radio"] {
   display: block;
   height: 100%;
   width: 0;
-  background: linear-gradient(90deg, var(--accent-strong), var(--accent));
+  background: linear-gradient(90deg, var(--brand-hover), var(--brand));
   border-radius: inherit;
 }
 
@@ -1300,7 +1256,7 @@ input[type="radio"] {
 .avatar-7 { background: #b8e986; }
 
 .is-you .avatar {
-  outline: 3px solid var(--accent-strong);
+  outline: 3px solid var(--brand-hover);
   outline-offset: 2px;
 }
 
