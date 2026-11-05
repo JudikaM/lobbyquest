@@ -2,6 +2,7 @@ const express = require('express');
 const agendas = require('./agendas');
 const votes = require('./votes');
 const participants = require('./participants');
+const managers = require('./managers');
 const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, formatDate, utcToLocalInput } = require('./time');
 const { readCookie, cookieOptions } = require('./security/cookies');
 const { publicOrigin } = require('./urls');
@@ -35,8 +36,36 @@ function findCurrentParticipant(req, agenda) {
   return participants.findParticipant(agenda.id, readCookie(req, participants.COOKIE));
 }
 
+// Token pengelola dari cookie, hanya jika valid untuk agenda ini.
+function managerToken(req, agenda) {
+  const token = readCookie(req, managers.COOKIE);
+  return managers.verifyToken(agenda.id, token) ? token : null;
+}
+
+function setManagerCookie(req, res, slug, token) {
+  res.cookie(managers.COOKIE, token, cookieOptions(req, {
+    path: `/a/${slug}`,
+    maxAge: managers.COOKIE_MAX_AGE,
+  }));
+}
+
+function requireManager(req, res, next) {
+  if (managerToken(req, req.agenda)) return next();
+  return res.status(403).render('error', {
+    title: 'Khusus pengelola',
+    message: 'Aksi ini hanya bisa dilakukan oleh pembuat agenda dari browser yang dipakai saat membuat agenda, atau setelah memasukkan kode pengelola.',
+  });
+}
+
+function renderManageLogin(res, agenda, { error } = {}) {
+  res.set('X-Robots-Tag', 'noindex, nofollow');
+  res.render('manage-login', { title: `Kelola ${agenda.title}`, noindex: true, agenda, error });
+}
+
 function renderAgenda(req, res, agenda, { voteValues, voteErrors = [] } = {}) {
   const participant = findCurrentParticipant(req, agenda);
+  const manager = managerToken(req, agenda);
+  const origin = publicOrigin(req);
   const optionIds = votes.participantOptionIds(participant);
   const voters = votes.tallyVotes(agenda);
   const topCount = Math.max(0, ...[...voters.values()].map((names) => names.length));
@@ -72,7 +101,13 @@ function renderAgenda(req, res, agenda, { voteValues, voteErrors = [] } = {}) {
     },
     voteErrors,
     nameMax: participants.NAME_MAX,
-    shareUrl: `${publicOrigin(req)}/a/${agenda.slug}`,
+    shareUrl: `${origin}/a/${agenda.slug}`,
+    isManager: Boolean(manager),
+    // Kode ada di fragment (#) sehingga tidak ikut terkirim ke server saat
+    // tautan dibuka; halaman /kelola mengirimkannya lewat POST.
+    managerUrl: manager ? `${origin}/a/${agenda.slug}/kelola#kode=${manager}` : null,
+    managerCode: manager,
+    managerWelcome: req.query.kelola === '1',
     justCreated: req.query.baru === '1',
     voteSaved: req.query.tersimpan === '1',
     privacyNotice: PRIVACY_NOTICE,
@@ -113,20 +148,48 @@ function createRouter(limiters) {
       return renderForm(res, values, errors);
     }
 
-    const slug = agendas.createAgenda(agenda);
+    const { slug, managerToken: token } = agendas.createAgenda(agenda);
+    // Browser pembuat langsung menjadi pengelola tanpa token di URL.
+    setManagerCookie(req, res, slug, token);
     res.redirect(303, `/a/${slug}?baru=1`);
   });
 
-  router.get('/a/:slug', (req, res, next) => {
-    const agenda = agendas.findAgendaBySlug(req.params.slug);
-    if (!agenda) return next();
-
-    renderAgenda(req, res, agenda);
+  // Semua route /a/:slug memuat agendanya lebih dulu; slug yang tidak ada
+  // diteruskan ke handler 404.
+  router.param('slug', (req, res, next, slug) => {
+    const agenda = agendas.findAgendaBySlug(slug);
+    if (!agenda) return next('route');
+    req.agenda = agenda;
+    return next();
   });
 
-  router.post('/a/:slug/suara', limiters.participate, (req, res, next) => {
-    const agenda = agendas.findAgendaBySlug(req.params.slug);
-    if (!agenda) return next();
+  router.get('/a/:slug', (req, res) => {
+    renderAgenda(req, res, req.agenda);
+  });
+
+  router.get('/a/:slug/kelola', (req, res) => {
+    if (managerToken(req, req.agenda)) return res.redirect(303, `/a/${req.agenda.slug}#kelola`);
+    renderManageLogin(res, req.agenda);
+  });
+
+  router.post('/a/:slug/kelola', limiters.manage, (req, res) => {
+    const { agenda } = req;
+    const code = typeof req.body.kode === 'string' ? req.body.kode.trim() : '';
+    if (!managers.verifyToken(agenda.id, code)) {
+      res.status(403);
+      return renderManageLogin(res, agenda, { error: 'Kode pengelola tidak cocok.' });
+    }
+    setManagerCookie(req, res, agenda.slug, code);
+    res.redirect(303, `/a/${agenda.slug}?kelola=1#kelola`);
+  });
+
+  router.post('/a/:slug/kelola/keluar', limiters.manage, requireManager, (req, res) => {
+    res.clearCookie(managers.COOKIE, cookieOptions(req, { path: `/a/${req.agenda.slug}` }));
+    res.redirect(303, `/a/${req.agenda.slug}`);
+  });
+
+  router.post('/a/:slug/suara', limiters.participate, (req, res) => {
+    const { agenda } = req;
     const { values, errors } = votes.validateVote(req.body, agenda);
     if (errors.length) {
       res.status(422);

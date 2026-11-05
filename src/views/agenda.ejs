@@ -82,6 +82,37 @@
   </form>
 </section>
 
+<% if (isManager) { %>
+<section class="manage" id="kelola" aria-labelledby="kelola-judul">
+  <h2 id="kelola-judul">Panel pengelola</h2>
+  <% if (managerWelcome) { %>
+  <p class="success" role="status">Kamu masuk sebagai pengelola agenda ini.</p>
+  <% } %>
+  <p class="note">Hanya kamu yang melihat bagian ini.</p>
+
+  <details class="manager-link">
+    <summary>Kelola dari perangkat lain</summary>
+    <p class="note">
+      Simpan tautan ini di tempat aman dan jangan dibagikan. Siapa pun yang
+      memilikinya bisa mengelola agenda ini.
+    </p>
+    <label class="field">
+      Tautan pengelola
+      <input type="text" value="<%= managerUrl %>" readonly data-select-on-focus>
+    </label>
+    <label class="field">
+      Atau kode pengelola
+      <input type="text" value="<%= managerCode %>" readonly data-select-on-focus>
+    </label>
+  </details>
+
+  <form method="post" action="/a/<%= agenda.slug %>/kelola/keluar">
+    <%- include('partials/csrf') %>
+    <button type="submit" class="link-button">Lupakan akses pengelola di browser ini</button>
+  </form>
+</section>
+<% } %>
+
 <section class="share">
   <label class="field">
     Tautan berbagi

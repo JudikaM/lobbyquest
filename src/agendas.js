@@ -2,6 +2,7 @@ const crypto = require('node:crypto');
 const db = require('./db');
 const { TIMEZONES, DEFAULT_TIMEZONE, localToUtc, formatMoment } = require('./time');
 const { cleanText, list } = require('./text');
+const managers = require('./managers');
 
 const KINDS = { mabar: 'Mabar', nongkrong: 'Nongkrong' };
 const LIMITS = { titleMin: 3, title: 100, description: 1000, location: 150 };
@@ -108,18 +109,22 @@ function validateAgenda(body = {}, now = new Date()) {
 }
 
 const insertAgenda = db.prepare(`
-  INSERT INTO agendas (slug, title, kind, description, location, timezone, created_at)
-  VALUES (@slug, @title, @kind, @description, @location, @timezone, @createdAt)
+  INSERT INTO agendas
+    (slug, title, kind, description, location, timezone, created_at, manager_token_hash)
+  VALUES
+    (@slug, @title, @kind, @description, @location, @timezone, @createdAt, @managerTokenHash)
 `);
 const insertTimeOption = db.prepare(`
   INSERT INTO time_options (agenda_id, starts_at, ends_at) VALUES (?, ?, ?)
 `);
 
 // Menyimpan agenda beserta semua pilihan waktunya dalam satu transaksi:
-// jika satu insert gagal, tidak ada yang tersimpan. Mengembalikan slug.
+// jika satu insert gagal, tidak ada yang tersimpan. Mengembalikan slug dan
+// token pengelola (hanya hash-nya yang disimpan di database).
 const createAgenda = db.transaction((agenda) => {
   // 12 byte acak = 96 bit, ditulis sebagai 16 karakter base64url.
   const slug = crypto.randomBytes(12).toString('base64url');
+  const manager = managers.generateToken();
   const { lastInsertRowid } = insertAgenda.run({
     slug,
     title: agenda.title,
@@ -128,14 +133,21 @@ const createAgenda = db.transaction((agenda) => {
     location: agenda.location,
     timezone: agenda.timezone,
     createdAt: new Date().toISOString(),
+    managerTokenHash: manager.hash,
   });
   for (const slot of agenda.slots) {
     insertTimeOption.run(lastInsertRowid, slot.startsAt, slot.endsAt);
   }
-  return slug;
+  return { slug, managerToken: manager.token };
 });
 
-const selectAgenda = db.prepare('SELECT * FROM agendas WHERE slug = ?');
+// Hash token pengelola sengaja tidak ikut dipilih agar tidak pernah sampai
+// ke template.
+const selectAgenda = db.prepare(`
+  SELECT id, slug, title, kind, description, location, timezone, created_at,
+         manager_token_hash IS NOT NULL AS has_manager
+  FROM agendas WHERE slug = ?
+`);
 const selectTimeOptions = db.prepare(
   'SELECT * FROM time_options WHERE agenda_id = ? ORDER BY starts_at, ends_at'
 );
