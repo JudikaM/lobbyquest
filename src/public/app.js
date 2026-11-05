@@ -218,3 +218,108 @@ for (const el of document.querySelectorAll('[data-tooltip]')) {
   el.addEventListener('mouseleave', reset);
   el.addEventListener('blur', reset);
 }
+
+// ---------- Menu dropdown (pola ARIA menu) ----------
+
+function setupMenu(trigger) {
+  const menu = document.getElementById(trigger.getAttribute('aria-controls'));
+  if (!menu) return null;
+  const items = () => [...menu.querySelectorAll('[role^="menuitem"]')];
+
+  const close = (focusTrigger = true) => {
+    if (menu.hidden) return;
+    menu.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    if (focusTrigger) trigger.focus();
+  };
+  const open = () => {
+    menu.hidden = false;
+    trigger.setAttribute('aria-expanded', 'true');
+    const all = items();
+    (all.find((item) => item.getAttribute('aria-checked') === 'true') || all[0])?.focus();
+  };
+
+  trigger.addEventListener('click', () => (menu.hidden ? open() : close()));
+  trigger.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      open();
+    }
+  });
+  menu.addEventListener('keydown', (event) => {
+    const all = items();
+    const index = all.indexOf(document.activeElement);
+    const next = {
+      ArrowDown: (index + 1) % all.length,
+      ArrowUp: (index - 1 + all.length) % all.length,
+      Home: 0,
+      End: all.length - 1,
+    }[event.key];
+    if (next !== undefined) {
+      event.preventDefault();
+      all[next].focus();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      close();
+    } else if (event.key === 'Tab') {
+      close(false);
+    }
+  });
+  document.addEventListener('click', (event) => {
+    if (!menu.hidden && !menu.contains(event.target) && !trigger.contains(event.target)) close(false);
+  });
+  return { close };
+}
+
+// ---------- Tema: terang, gelap, atau ikuti perangkat ----------
+
+const THEME_COLORS = { light: '#fafafa', dark: '#0b0b0d' };
+
+function setThemeMeta(value) {
+  for (const meta of document.querySelectorAll('meta[name="theme-color"]')) meta.remove();
+  const scheme = document.querySelector('meta[name="color-scheme"]');
+  if (scheme) scheme.content = value === 'system' ? 'light dark' : value;
+  const entries = value === 'system'
+    ? [['light', '(prefers-color-scheme: light)'], ['dark', '(prefers-color-scheme: dark)']]
+    : [[value, null]];
+  for (const [theme, media] of entries) {
+    const meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    meta.content = THEME_COLORS[theme];
+    if (media) meta.media = media;
+    document.head.append(meta);
+  }
+}
+
+function applyTheme(value) {
+  const root = document.documentElement;
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  if (value === 'system') {
+    delete root.dataset.theme;
+    document.cookie = `lq_tema=; Path=/; Max-Age=0; SameSite=Lax${secure}`;
+  } else {
+    root.dataset.theme = value;
+    // Cookie preferensi tampilan saja; dibaca server agar tidak ada kedipan.
+    document.cookie = `lq_tema=${value}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`;
+  }
+  setThemeMeta(value);
+}
+
+const themeMenu = document.querySelector('[data-theme-menu]');
+if (themeMenu) {
+  const trigger = themeMenu.querySelector('[data-menu-trigger]');
+  const menu = setupMenu(trigger);
+  themeMenu.hidden = false;
+  for (const item of themeMenu.querySelectorAll('[data-theme-value]')) {
+    item.addEventListener('click', () => {
+      const value = item.dataset.themeValue;
+      for (const other of themeMenu.querySelectorAll('[data-theme-value]')) {
+        other.setAttribute('aria-checked', String(other === item));
+      }
+      const swap = () => applyTheme(value);
+      if (document.startViewTransition && !reducedMotion()) document.startViewTransition(swap);
+      else swap();
+      menu?.close();
+    });
+  }
+}

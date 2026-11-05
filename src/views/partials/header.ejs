@@ -44,6 +44,7 @@
     <div class="container app-header-inner">
       <%- include('logo') %>
       <div class="header-actions">
+        <%- include('theme-toggle') %>
         <% if (!locals.hideHeaderCta) { %>
         <a class="btn btn-brand btn-sm" href="/agenda/baru"><%- icon('plus') %><span>Buat agenda</span></a>
         <% } %>

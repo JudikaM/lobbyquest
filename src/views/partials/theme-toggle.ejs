@@ -1,0 +1,18 @@
+<%# Pilihan tema. Disembunyikan sampai app.js aktif (butuh JavaScript). %>
+<div class="menu-anchor" data-theme-menu hidden>
+  <button type="button" class="btn btn-ghost btn-icon" aria-haspopup="menu" aria-expanded="false"
+    aria-controls="menu-tema" data-menu-trigger data-tooltip="Tema tampilan" data-tooltip-side="bottom">
+    <%- icon('sun', { size: 18, className: 'theme-icon-light' }) %>
+    <%- icon('moon', { size: 18, className: 'theme-icon-dark' }) %>
+    <span class="sr-only">Ganti tema tampilan</span>
+  </button>
+  <div class="menu" id="menu-tema" role="menu" aria-label="Tema tampilan" hidden>
+    <p class="menu-label kicker" aria-hidden="true">Tema</p>
+    <% [['light', 'sun', 'Terang'], ['dark', 'moon', 'Gelap'], ['system', 'monitor', 'Ikuti perangkat']].forEach(([value, iconName, label]) => { %>
+    <button type="button" class="menu-item" role="menuitemradio" tabindex="-1"
+      aria-checked="<%= (locals.theme || 'system') === value ? 'true' : 'false' %>" data-theme-value="<%= value %>">
+      <%- icon(iconName) %><%= label %><%- icon('check', { className: 'menu-check' }) %>
+    </button>
+    <% }) %>
+  </div>
+</div>
