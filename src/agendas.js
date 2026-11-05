@@ -14,8 +14,12 @@ function text(value) {
 }
 
 // Memeriksa isian form agenda. Mengembalikan `values` (isian mentah untuk
-// ditampilkan ulang), `errors` (pesan untuk pengguna), dan `agenda` (data
-// siap simpan, hanya jika tidak ada error).
+// ditampilkan ulang), `errors` (pesan lengkap untuk ringkasan), `issues`
+// (pesan per field: { field, message, summary } untuk error inline), dan
+// `agenda` (data siap simpan, hanya jika tidak ada error).
+//
+// Kunci field: title, kind, description, location, timezone, capacity,
+// slots (jumlah pilihan), dan slot-1, slot-2, … (pilihan tertentu).
 function validateAgenda(body = {}, now = new Date()) {
   const starts = list(body.start);
   const ends = list(body.end);
@@ -28,43 +32,45 @@ function validateAgenda(body = {}, now = new Date()) {
     capacity: text(body.capacity),
     slots: starts.map((start, i) => ({ start: text(start), end: text(ends[i]) })),
   };
-  const errors = [];
+  const issues = [];
+  const fail = (field, message, summary = message) => issues.push({ field, message, summary });
   // Object.hasOwn agar nama bawaan objek seperti "constructor" atau
   // "toString" tidak dianggap sebagai pilihan yang sah.
   const validKind = Object.hasOwn(KINDS, values.kind);
   const validTimezone = Object.hasOwn(TIMEZONES, values.timezone);
 
   if (values.title.length < LIMITS.titleMin || values.title.length > LIMITS.title) {
-    errors.push(`Judul wajib diisi, ${LIMITS.titleMin}–${LIMITS.title} karakter.`);
+    fail('title', `Judul wajib diisi, ${LIMITS.titleMin}–${LIMITS.title} karakter.`);
   }
   if (!validKind) {
-    errors.push('Pilih jenis agenda: mabar atau nongkrong.');
+    fail('kind', 'Pilih jenis agenda: mabar atau nongkrong.');
   }
   if (values.description.length > LIMITS.description) {
-    errors.push(`Deskripsi maksimal ${LIMITS.description} karakter.`);
+    fail('description', `Deskripsi maksimal ${LIMITS.description} karakter.`);
   }
   if (values.location.length > LIMITS.location) {
-    errors.push(`Lokasi atau platform maksimal ${LIMITS.location} karakter.`);
+    fail('location', `Lokasi atau platform maksimal ${LIMITS.location} karakter.`);
   }
   if (!validTimezone) {
-    errors.push('Zona waktu tidak dikenal.');
+    fail('timezone', 'Zona waktu tidak dikenal.');
   }
 
   let capacity = null;
   if (values.capacity) {
     capacity = /^\d{1,3}$/.test(values.capacity) ? Number(values.capacity) : NaN;
     if (!(capacity >= LIMITS.capacityMin && capacity <= LIMITS.capacityMax)) {
-      errors.push(`Kuota party harus angka ${LIMITS.capacityMin}–${LIMITS.capacityMax}, atau dikosongkan.`);
+      fail('capacity', `Kuota party harus angka ${LIMITS.capacityMin}–${LIMITS.capacityMax}, atau dikosongkan.`);
     }
   }
 
   const slots = [];
   const seen = new Set();
   values.slots.forEach((slot, i) => {
-    const label = `Pilihan waktu ${i + 1}`;
+    const field = `slot-${i + 1}`;
+    const slotFail = (message) => fail(field, message, `Pilihan waktu ${i + 1}: ${message}`);
     if (!slot.start && !slot.end) return;
     if (!slot.start || !slot.end) {
-      errors.push(`${label}: isi waktu mulai dan selesai.`);
+      slotFail('isi waktu mulai dan selesai.');
       return;
     }
     if (!validTimezone) return;
@@ -72,16 +78,16 @@ function validateAgenda(body = {}, now = new Date()) {
     const startsAt = localToUtc(slot.start, values.timezone);
     const endsAt = localToUtc(slot.end, values.timezone);
     if (!startsAt || !endsAt) {
-      errors.push(`${label}: format tanggal atau jam tidak valid.`);
+      slotFail('format tanggal atau jam tidak valid.');
       return;
     }
     if (endsAt <= startsAt) {
-      errors.push(`${label}: waktu selesai harus setelah waktu mulai.`);
+      slotFail('waktu selesai harus setelah waktu mulai.');
       return;
     }
     if (startsAt <= now) {
-      errors.push(
-        `${label}: waktu mulai (${formatMoment(startsAt, values.timezone)}) sudah lewat. ` +
+      slotFail(
+        `waktu mulai (${formatMoment(startsAt, values.timezone)}) sudah lewat. ` +
         `Sekarang ${formatMoment(now, values.timezone)}.`
       );
       return;
@@ -89,7 +95,7 @@ function validateAgenda(body = {}, now = new Date()) {
 
     const key = `${startsAt.toISOString()}|${endsAt.toISOString()}`;
     if (seen.has(key)) {
-      errors.push(`${label}: sama dengan pilihan waktu lain.`);
+      slotFail('sama dengan pilihan waktu lain.');
       return;
     }
     seen.add(key);
@@ -98,14 +104,16 @@ function validateAgenda(body = {}, now = new Date()) {
 
   const filled = values.slots.filter((slot) => slot.start || slot.end).length;
   if (filled < MIN_SLOTS || filled > MAX_SLOTS) {
-    errors.push(`Isi ${MIN_SLOTS} sampai ${MAX_SLOTS} pilihan waktu.`);
+    fail('slots', `Isi ${MIN_SLOTS} sampai ${MAX_SLOTS} pilihan waktu.`);
   }
 
-  if (errors.length) return { values, errors, agenda: null };
+  const errors = issues.map((issue) => issue.summary);
+  if (errors.length) return { values, errors, issues, agenda: null };
 
   return {
     values,
     errors,
+    issues,
     agenda: {
       title: values.title,
       kind: values.kind,

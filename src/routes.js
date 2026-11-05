@@ -45,18 +45,29 @@ const PRIVACY_NOTICE =
   'Siapa pun yang memiliki tautan dapat melihat agenda ini. ' +
   'Hindari memasukkan data pribadi atau sensitif.';
 
-function renderForm(res, values, errors = []) {
+// Tautan ringkasan error ke field yang bermasalah.
+function errorAnchor(field) {
+  if (field === 'kind') return '#kind-mabar';
+  if (field === 'slots') return '#waktu';
+  if (field.startsWith('slot-')) return `#${field}-start`;
+  return `#${field}`;
+}
+
+function renderForm(res, values, issues = []) {
   // Form selalu menampilkan minimal dua baris pilihan waktu.
   const slots = [...values.slots];
   while (slots.length < agendas.MIN_SLOTS) slots.push({ start: '', end: '' });
   // Batas bawah pemilih tanggal: waktu sekarang di zona yang dipilih.
   const timezone = Object.hasOwn(TIMEZONES, values.timezone) ? values.timezone : DEFAULT_TIMEZONE;
+  const fieldErrors = {};
+  for (const issue of issues) fieldErrors[issue.field] ||= issue.message;
 
   res.render('agenda-form', {
     title: 'Buat agenda',
     values: { ...values, slots },
     minDateTime: utcToLocalInput(new Date(), timezone),
-    errors,
+    fieldErrors,
+    errorItems: issues.map((issue) => ({ text: issue.summary, href: errorAnchor(issue.field) })),
     privacyNotice: PRIVACY_NOTICE,
     kinds: agendas.KINDS,
     timezones: TIMEZONES,
@@ -280,10 +291,10 @@ function createRouter(limiters) {
   });
 
   router.post('/agenda', limiters.create, (req, res) => {
-    const { values, errors, agenda } = agendas.validateAgenda(req.body);
-    if (errors.length) {
+    const { values, issues, agenda } = agendas.validateAgenda(req.body);
+    if (issues.length) {
       res.status(422);
-      return renderForm(res, values, errors);
+      return renderForm(res, values, issues);
     }
 
     const { slug, managerToken: token } = agendas.createAgenda(agenda);

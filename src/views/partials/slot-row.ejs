@@ -1,14 +1,25 @@
-<fieldset class="slot" data-slot>
-  <legend class="slot-number">Pilihan <span data-slot-number><%= number %></span></legend>
-  <label>
-    <span>Mulai</span>
-    <input type="datetime-local" name="start" value="<%= slot.start %>" min="<%= minDateTime %>">
-  </label>
-  <label>
-    <span>Selesai</span>
-    <input type="datetime-local" name="end" value="<%= slot.end %>" min="<%= minDateTime %>">
-  </label>
-  <button type="button" class="button button-ghost button-small slot-remove" data-remove-slot hidden>
-    Hapus<span class="visually-hidden"> pilihan ini</span>
+<%# Satu baris pilihan waktu. `number` kosong untuk template (diisi app). %>
+<fieldset class="slot" data-slot<% if (slotError) { %> aria-describedby="slot-<%= number %>-error"<% } %>>
+  <legend class="slot-legend">
+    <span class="slot-badge mono" data-slot-number><%= number %></span>
+    <span class="sr-only">Pilihan waktu</span>
+  </legend>
+  <div class="slot-fields">
+    <label class="slot-field">
+      <span class="slot-label">Mulai</span>
+      <input class="input" type="datetime-local" name="start" value="<%= slot.start %>" min="<%= minDateTime %>"
+        <% if (number) { %>id="slot-<%= number %>-start"<% } %> data-slot-start<% if (slotError) { %> aria-invalid="true"<% } %>>
+    </label>
+    <label class="slot-field">
+      <span class="slot-label">Selesai</span>
+      <input class="input" type="datetime-local" name="end" value="<%= slot.end %>" min="<%= minDateTime %>"
+        <% if (number) { %>id="slot-<%= number %>-end"<% } %> data-slot-end<% if (slotError) { %> aria-invalid="true"<% } %>>
+    </label>
+  </div>
+  <button type="button" class="btn btn-ghost btn-icon btn-sm slot-remove" data-remove-slot hidden data-tooltip="Hapus pilihan" data-tooltip-align="end">
+    <%- icon('trash-2', { label: 'Hapus pilihan waktu ini' }) %>
   </button>
+  <% if (slotError) { %>
+  <p class="field-error slot-error" id="slot-<%= number %>-error"><%- icon('circle-alert') %><%= slotError %></p>
+  <% } %>
 </fieldset>
