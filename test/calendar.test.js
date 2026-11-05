@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const { escapeText, fold, buildIcs, googleCalendarUrl } = require('../src/calendar');
 
 test('escapeText mengikuti RFC 5545', () => {
-  assert.equal(escapeText('a,b;c\\d\ne'), 'a\\,b\;c\\\\d\\ne');
+  assert.equal(escapeText('a,b;c\\d\ne'), 'a\\,b\\;c\\\\d\\ne');
 });
 
 test('fold memotong baris di 75 oktet tanpa merusak UTF-8', () => {
@@ -30,7 +30,7 @@ test('buildIcs menghasilkan VEVENT yang valid', () => {
   assert.match(ics, /^BEGIN:VCALENDAR\r\n/);
   assert.match(ics, /\r\nDTSTART:20261107T120000Z\r\n/);
   assert.match(ics, /\r\nDTEND:20261107T150000Z\r\n/);
-  assert.match(ics, /\r\nSUMMARY:Mabar\\, ranked\; malam\r\n/);
+  assert.match(ics, /\r\nSUMMARY:Mabar\\, ranked\\; malam\r\n/);
   assert.match(ics, /\r\nEND:VCALENDAR\r\n$/);
   assert.doesNotMatch(ics, /UID:.*AAAAAAAAAAAAAAAA/, 'UID tidak memuat slug');
   assert.doesNotMatch(ics.replace(/\r\n/g, ''), /\n/, 'tidak ada LF tanpa CR');

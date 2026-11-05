@@ -4,7 +4,7 @@ const crypto = require('node:crypto');
 function escapeText(value) {
   return String(value)
     .replace(/\\/g, '\\\\')
-    .replace(/;/g, '\;')
+    .replace(/;/g, '\\;')
     .replace(/,/g, '\\,')
     .replace(/\r?\n/g, '\\n');
 }
