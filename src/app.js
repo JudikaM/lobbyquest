@@ -1,5 +1,6 @@
 const path = require('node:path');
 const express = require('express');
+const compression = require('compression');
 const { loadConfig } = require('./config');
 const { createRouter } = require('./routes');
 const { securityHeaders } = require('./security/headers');
@@ -28,6 +29,8 @@ function createApp({ config = loadConfig(), rateLimits } = {}) {
   // belakang reverse proxy. Bawaan: tidak memercayai X-Forwarded-*.
   app.set('trust proxy', config.trustProxy);
 
+  // Mengompres respons teks (HTML, CSS, JS, JSON, SVG) sebelum dikirim.
+  app.use(compression());
   app.use(securityHeaders(config));
   // Kode status tersedia di template (dipakai halaman error).
   app.use((req, res, next) => {
