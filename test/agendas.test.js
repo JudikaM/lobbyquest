@@ -56,3 +56,17 @@ test('field bukan string tidak membuat validasi error', () => {
   const { errors } = validateAgenda(body({ title: ['a', 'b'], description: { x: 1 } }), NOW);
   assert.ok(errors.length);
 });
+
+test('error dikelompokkan per field untuk pesan inline', () => {
+  const { errors, issues } = validateAgenda(body({
+    title: 'ab',
+    kind: 'x',
+    start: ['2026-11-10T19:00', '2026-11-01T19:00'],
+    end: ['2026-11-10T18:00', '2026-11-01T21:00'],
+  }), NOW);
+  const fields = issues.map((issue) => issue.field);
+  assert.deepEqual(fields, ['title', 'kind', 'slot-1', 'slot-2']);
+  assert.equal(errors.length, issues.length);
+  assert.match(issues[2].summary, /^Pilihan waktu 1: /);
+  assert.doesNotMatch(issues[2].message, /^Pilihan waktu/);
+});

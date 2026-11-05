@@ -1,109 +1,212 @@
-<%- include('partials/header', { hideHeaderCta: true }) %>
+<%- include('partials/header', { redesigned: true, hideHeaderCta: true }) %>
 
-<header class="page-head">
-  <p class="eyebrow">Lobby baru</p>
-  <h1>Buat agenda</h1>
-  <p class="lead">Isi detailnya, tambahkan beberapa pilihan waktu, lalu bagikan tautannya.</p>
-</header>
+<div class="container form-page">
+  <header class="page-header form-header">
+    <p class="kicker"><%- icon('door-open') %> Lobby baru</p>
+    <h1 class="page-title">Buat agenda</h1>
+    <p class="lead">Isi detailnya, tambahkan beberapa pilihan waktu, lalu bagikan tautannya ke grup.</p>
+    <ol class="form-steps" aria-label="Bagian form">
+      <li><a href="#detail"><span class="form-step-num mono">1</span>Detail</a></li>
+      <li><a href="#waktu"><span class="form-step-num mono">2</span>Waktu</a></li>
+      <li><a href="#party"><span class="form-step-num mono">3</span>Party</a></li>
+    </ol>
+  </header>
 
-<p class="flash flash-notice"><%= privacyNotice %></p>
+  <div class="form-layout">
+    <form class="form-main" method="post" action="/agenda" novalidate data-agenda-form>
+      <%- include('partials/csrf') %>
 
-<% if (errors.length) { %>
-<div class="flash flash-error" role="alert" tabindex="-1" data-focus-on-load>
-  <p><strong>Agenda belum disimpan.</strong> Periksa kembali isian berikut:</p>
-  <ul>
-    <% errors.forEach((error) => { %>
-    <li><%= error %></li>
-    <% }) %>
-  </ul>
-</div>
-<% } %>
+      <% if (errorItems.length) { %>
+      <%- include('partials/ui/alert', { alert: {
+        variant: 'destructive',
+        title: errorItems.length === 1 ? 'Ada 1 hal yang perlu diperbaiki' : `Ada ${errorItems.length} hal yang perlu diperbaiki`,
+        items: errorItems,
+        focus: true,
+        id: 'ringkasan-error',
+      } }) %>
+      <% } else { %>
+      <%- include('partials/ui/alert', { alert: { variant: 'info', text: privacyNotice } }) %>
+      <% } %>
 
-<form class="form" method="post" action="/agenda">
-  <%- include('partials/csrf') %>
+      <section class="card form-card" id="detail" aria-labelledby="detail-judul">
+        <div class="card-header">
+          <h2 class="card-title" id="detail-judul"><span class="form-card-num mono">1</span>Detail lobby</h2>
+          <p class="card-description">Judul dan jenis wajib diisi; sisanya opsional.</p>
+        </div>
+        <div class="card-content stack stack-lg">
+          <div class="field">
+            <div class="field-row">
+              <label class="label" for="title">Judul</label>
+              <span class="counter mono" data-counter-for="title" aria-hidden="true"></span>
+            </div>
+            <input class="input" id="title" type="text" name="title" value="<%= values.title %>"
+              required minlength="<%= limits.titleMin %>" maxlength="<%= limits.title %>"
+              placeholder="Contoh: Mabar ranked Sabtu malam" autocomplete="off"
+              <% if (fieldErrors.title) { %>aria-invalid="true" aria-describedby="title-error"<% } %>>
+            <% if (fieldErrors.title) { %>
+            <p class="field-error" id="title-error"><%- icon('circle-alert') %><%= fieldErrors.title %></p>
+            <% } %>
+          </div>
 
-  <section class="panel">
-    <h2 class="panel-title">Detail</h2>
+          <fieldset class="field" <% if (fieldErrors.kind) { %>aria-describedby="kind-error"<% } %>>
+            <legend class="label">Jenis</legend>
+            <div class="kind-picker">
+              <% Object.entries(kinds).forEach(([value, label]) => { %>
+              <label class="kind-card">
+                <input type="radio" name="kind" value="<%= value %>" id="kind-<%= value %>" required
+                  <%= values.kind === value ? 'checked' : '' %>>
+                <span class="kind-card-icon"><%- icon(value === 'mabar' ? 'gamepad-2' : 'coffee', { size: 20 }) %></span>
+                <span class="kind-card-label"><%= label %></span>
+                <span class="kind-card-hint"><%= value === 'mabar' ? 'Main game bareng' : 'Ketemuan santai' %></span>
+                <span class="kind-card-check"><%- icon('check', { size: 14 }) %></span>
+              </label>
+              <% }) %>
+            </div>
+            <% if (fieldErrors.kind) { %>
+            <p class="field-error" id="kind-error"><%- icon('circle-alert') %><%= fieldErrors.kind %></p>
+            <% } %>
+          </fieldset>
 
-    <div class="field">
-      <label for="title">Judul</label>
-      <input id="title" type="text" name="title" value="<%= values.title %>"
-        required minlength="<%= limits.titleMin %>" maxlength="<%= limits.title %>"
-        placeholder="Contoh: Mabar ranked Sabtu malam" autocomplete="off">
-    </div>
+          <div class="field">
+            <div class="field-row">
+              <label class="label" for="description">Deskripsi <span class="optional">(opsional)</span></label>
+              <span class="counter mono" data-counter-for="description" aria-hidden="true"></span>
+            </div>
+            <textarea class="textarea" id="description" name="description" rows="3" maxlength="<%= limits.description %>"
+              placeholder="Contoh: Bawa headset. Target naik ke Legend."
+              <% if (fieldErrors.description) { %>aria-invalid="true" aria-describedby="description-error"<% } %>><%= values.description %></textarea>
+            <% if (fieldErrors.description) { %>
+            <p class="field-error" id="description-error"><%- icon('circle-alert') %><%= fieldErrors.description %></p>
+            <% } %>
+          </div>
 
-    <fieldset class="field">
-      <legend>Jenis</legend>
-      <div class="kind-picker">
-        <% Object.entries(kinds).forEach(([value, label]) => { %>
-        <label class="kind-option">
-          <input type="radio" name="kind" value="<%= value %>" required
-            <%= values.kind === value ? 'checked' : '' %>>
-          <span class="kind-icon" aria-hidden="true"><%= value === 'mabar' ? '🎮' : '☕' %></span>
-          <span class="kind-label"><%= label %></span>
-          <span class="kind-hint"><%= value === 'mabar' ? 'Main game bareng' : 'Ketemuan santai' %></span>
-        </label>
-        <% }) %>
+          <div class="field">
+            <label class="label" for="location">Lokasi umum atau platform <span class="optional">(opsional)</span></label>
+            <span class="input-wrap">
+              <%- icon('map-pin') %>
+              <input class="input" id="location" type="text" name="location" value="<%= values.location %>"
+                maxlength="<%= limits.location %>" placeholder="Contoh: Discord, atau kafe di Blok M" autocomplete="off"
+                aria-describedby="location-hint<% if (fieldErrors.location) { %> location-error<% } %>"
+                <% if (fieldErrors.location) { %>aria-invalid="true"<% } %>>
+            </span>
+            <p class="hint" id="location-hint">Cukup lokasi umum. Jangan tulis alamat rumah.</p>
+            <% if (fieldErrors.location) { %>
+            <p class="field-error" id="location-error"><%- icon('circle-alert') %><%= fieldErrors.location %></p>
+            <% } %>
+          </div>
+        </div>
+      </section>
+
+      <section class="card form-card" id="waktu" aria-labelledby="waktu-judul">
+        <div class="card-header">
+          <h2 class="card-title" id="waktu-judul"><span class="form-card-num mono">2</span>Pilihan waktu</h2>
+          <p class="card-description" id="slots-hint">
+            Isi 2 sampai <%= maxSlots %> pilihan di masa depan. Baris yang kosong diabaikan.
+          </p>
+        </div>
+        <div class="card-content stack stack-lg">
+          <div class="field">
+            <label class="label" for="timezone">Zona waktu</label>
+            <span class="select-wrap">
+              <select class="select" id="timezone" name="timezone" data-timezone-select
+                <% if (fieldErrors.timezone) { %>aria-invalid="true" aria-describedby="timezone-error"<% } %>>
+                <% Object.entries(timezones).forEach(([value, label]) => { %>
+                <option value="<%= value %>" <%= values.timezone === value ? 'selected' : '' %>><%= label %> (<%= value %>)</option>
+                <% }) %>
+              </select>
+              <%- icon('chevron-down') %>
+            </span>
+            <% if (fieldErrors.timezone) { %>
+            <p class="field-error" id="timezone-error"><%- icon('circle-alert') %><%= fieldErrors.timezone %></p>
+            <% } %>
+          </div>
+
+          <div class="presets" data-presets hidden>
+            <p class="kicker"><%- icon('zap') %> Isi cepat</p>
+            <div class="preset-list" role="group" aria-label="Isi cepat pilihan waktu">
+              <button type="button" class="btn btn-outline btn-sm" data-preset="tonight"><%- icon('moon') %>Malam ini 19.00</button>
+              <button type="button" class="btn btn-outline btn-sm" data-preset="tomorrow"><%- icon('calendar') %>Besok 19.00</button>
+              <button type="button" class="btn btn-outline btn-sm" data-preset="saturday"><%- icon('gamepad-2') %>Sabtu 19.00</button>
+              <button type="button" class="btn btn-outline btn-sm" data-preset="sunday"><%- icon('coffee') %>Minggu 15.00</button>
+            </div>
+            <p class="hint" data-preset-status role="status" aria-live="polite"></p>
+          </div>
+
+          <% if (fieldErrors.slots) { %>
+          <p class="field-error" id="slots-error"><%- icon('circle-alert') %><%= fieldErrors.slots %></p>
+          <% } %>
+          <div class="slots" id="slots" data-slots data-max="<%= maxSlots %>" aria-describedby="slots-hint">
+            <% values.slots.forEach((slot, i) => { %>
+            <%- include('partials/slot-row', { slot, number: i + 1, slotError: fieldErrors[`slot-${i + 1}`] }) %>
+            <% }) %>
+          </div>
+          <button type="button" class="btn btn-outline add-slot" data-add-slot hidden><%- icon('plus') %>Tambah pilihan waktu</button>
+        </div>
+      </section>
+
+      <template id="slot-template">
+        <%- include('partials/slot-row', { slot: { start: '', end: '' }, number: '', slotError: null }) %>
+      </template>
+
+      <section class="card form-card" id="party" aria-labelledby="party-judul">
+        <div class="card-header">
+          <h2 class="card-title" id="party-judul"><span class="form-card-num mono">3</span>Party <span class="optional">(opsional)</span></h2>
+          <p class="card-description">Batasi jumlah yang bisa konfirmasi hadir, misalnya 5 untuk satu squad.</p>
+        </div>
+        <div class="card-content">
+          <div class="field">
+            <label class="label" for="capacity">Kuota hadir</label>
+            <div class="stepper" data-stepper>
+              <button type="button" class="btn btn-outline btn-icon" data-step="-1" hidden><%- icon('minus', { label: 'Kurangi kuota' }) %></button>
+              <input class="input stepper-input" id="capacity" type="number" name="capacity" value="<%= values.capacity %>"
+                min="<%= limits.capacityMin %>" max="<%= limits.capacityMax %>" step="1" inputmode="numeric"
+                placeholder="Bebas" aria-describedby="capacity-hint<% if (fieldErrors.capacity) { %> capacity-error<% } %>"
+                <% if (fieldErrors.capacity) { %>aria-invalid="true"<% } %>>
+              <button type="button" class="btn btn-outline btn-icon" data-step="1" hidden><%- icon('plus', { label: 'Tambah kuota' }) %></button>
+            </div>
+            <p class="hint" id="capacity-hint">Angka <%= limits.capacityMin %>–<%= limits.capacityMax %>. Kosongkan jika tidak dibatasi.</p>
+            <% if (fieldErrors.capacity) { %>
+            <p class="field-error" id="capacity-error"><%- icon('circle-alert') %><%= fieldErrors.capacity %></p>
+            <% } %>
+          </div>
+        </div>
+      </section>
+
+      <div class="submit-bar">
+        <p class="submit-note"><%- icon('key-round') %>Kamu otomatis menjadi pengelola agenda ini.</p>
+        <button type="submit" class="btn btn-brand btn-lg">Buat lobby <%- icon('arrow-right') %></button>
       </div>
-    </fieldset>
+    </form>
 
-    <div class="field">
-      <label for="description">Deskripsi <span class="optional">(opsional)</span></label>
-      <textarea id="description" name="description" rows="3" maxlength="<%= limits.description %>"
-        placeholder="Contoh: Bawa headset. Target naik ke Legend."><%= values.description %></textarea>
-    </div>
-
-    <div class="field">
-      <label for="location">Lokasi umum atau platform <span class="optional">(opsional)</span></label>
-      <input id="location" type="text" name="location" value="<%= values.location %>"
-        maxlength="<%= limits.location %>" placeholder="Contoh: Discord, atau kafe di Blok M"
-        aria-describedby="location-hint" autocomplete="off">
-      <small id="location-hint">Cukup lokasi umum. Jangan tulis alamat rumah.</small>
-    </div>
-
-    <div class="field">
-      <label for="capacity">Kuota party <span class="optional">(opsional)</span></label>
-      <input id="capacity" type="number" name="capacity" value="<%= values.capacity %>"
-        min="<%= limits.capacityMin %>" max="<%= limits.capacityMax %>" step="1" inputmode="numeric"
-        placeholder="Contoh: 5" aria-describedby="capacity-hint" class="input-short">
-      <small id="capacity-hint">Batas orang yang bisa konfirmasi hadir, misalnya 5 untuk satu squad. Kosongkan jika bebas.</small>
-    </div>
-  </section>
-
-  <section class="panel">
-    <h2 class="panel-title">Pilihan waktu</h2>
-
-    <div class="field">
-      <label for="timezone">Zona waktu</label>
-      <select id="timezone" name="timezone" data-timezone-select>
-        <% Object.entries(timezones).forEach(([value, label]) => { %>
-        <option value="<%= value %>" <%= values.timezone === value ? 'selected' : '' %>>
-          <%= label %> (<%= value %>)
-        </option>
-        <% }) %>
-      </select>
-    </div>
-
-    <p class="hint" id="slots-hint">
-      Isi 2 sampai <%= maxSlots %> pilihan di masa depan, dalam zona waktu di atas.
-      Baris yang kosong diabaikan.
-    </p>
-    <div class="slots" data-slots data-max="<%= maxSlots %>" aria-describedby="slots-hint">
-      <% values.slots.forEach((slot, i) => { %>
-      <%- include('partials/slot-row', { slot, number: i + 1 }) %>
-      <% }) %>
-    </div>
-    <button type="button" class="button button-secondary" data-add-slot hidden>+ Tambah pilihan waktu</button>
-  </section>
-
-  <template id="slot-template">
-    <%- include('partials/slot-row', { slot: { start: '', end: '' }, number: '' }) %>
-  </template>
-
-  <div class="form-actions">
-    <button type="submit" class="button button-primary button-large">Buat agenda</button>
+    <aside class="form-aside" aria-label="Pratinjau lobby">
+      <div class="card preview-card">
+        <div class="card-header">
+          <p class="kicker"><%- icon('eye') %> Pratinjau</p>
+        </div>
+        <div class="card-content stack">
+          <p class="btn-row">
+            <span class="badge badge-outline" data-preview-kind data-kind="<%= values.kind %>"><%- icon('gamepad-2', { className: 'preview-kind-mabar' }) %><%- icon('coffee', { className: 'preview-kind-nongkrong' }) %><span data-preview-kind-label><%= values.kind && kinds[values.kind] ? kinds[values.kind] : 'Jenis' %></span></span>
+            <span class="badge badge-info"><span class="dot"></span>Voting</span>
+          </p>
+          <p class="preview-title<%= values.title ? '' : ' is-empty' %>" data-preview-title><%= values.title || 'Judul agenda' %></p>
+          <ul class="preview-meta">
+            <li><%- icon('calendar') %><span data-preview-slots><%= values.slots.filter((s) => s.start).length %></span> pilihan waktu</li>
+            <li><%- icon('globe') %><span data-preview-zone><%= timezones[values.timezone] || 'WIB' %></span></li>
+            <li><%- icon('users') %><span data-preview-capacity><%= values.capacity ? `Kuota ${values.capacity}` : 'Kuota bebas' %></span></li>
+          </ul>
+          <hr class="card-divider">
+          <p class="kicker">Setelah dibuat</p>
+          <ol class="next-steps">
+            <li><%- icon('share-2') %>Bagikan tautan ke grup</li>
+            <li><%- icon('vote') %>Teman memilih waktu</li>
+            <li><%- icon('lock') %>Kamu kunci jadwalnya</li>
+            <li><%- icon('check-check') %>Semua ready check</li>
+          </ol>
+        </div>
+      </div>
+    </aside>
   </div>
-</form>
+</div>
 
 <script type="module" src="/agenda-form.js"></script>
 
