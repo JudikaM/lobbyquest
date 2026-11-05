@@ -1,0 +1,28 @@
+<%- include('partials/header') %>
+
+<h1>Masuk sebagai pengelola</h1>
+<p>Agenda: <strong><%= agenda.title %></strong></p>
+<p class="note">
+  Masukkan kode pengelola yang kamu simpan saat membuat agenda. Setelah itu,
+  browser ini bisa menetapkan waktu dan mengelola agenda.
+</p>
+
+<% if (error) { %>
+<div class="errors" role="alert"><p><%= error %></p></div>
+<% } %>
+
+<form class="form" method="post" action="/a/<%= agenda.slug %>/kelola" data-manage-login>
+  <%- include('partials/csrf') %>
+  <label class="field">
+    Kode pengelola
+    <input type="password" name="kode" required autocomplete="off" spellcheck="false"
+      maxlength="64" data-manage-code>
+  </label>
+  <button type="submit" class="primary-button">Masuk</button>
+</form>
+
+<p><a href="/a/<%= agenda.slug %>">Kembali ke agenda</a></p>
+
+<script src="/kelola.js"></script>
+
+<%- include('partials/footer') %>
