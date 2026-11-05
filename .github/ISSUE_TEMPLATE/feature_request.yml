@@ -1,0 +1,27 @@
+name: Usulan fitur
+description: Ide untuk membuat LobbyQuest lebih berguna.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Masalah yang ingin diselesaikan
+      description: Ceritakan situasinya. Misalnya, "Saat atur mabar, aku kesulitan ..."
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Usulan solusi
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatif yang sudah dipertimbangkan
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Prinsip proyek
+      options:
+        - label: Usulan ini tidak membutuhkan akun, pelacak, atau layanan pihak ketiga yang menerima data pengguna.

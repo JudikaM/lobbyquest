@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Laporkan celah keamanan
+    url: https://github.com/JudikaM/lobbyquest/security/advisories/new
+    about: Celah keamanan dilaporkan secara privat lewat GitHub Security Advisories, bukan lewat issue publik.
