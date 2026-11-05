@@ -54,6 +54,7 @@
   <% } %>
 
   <form class="form" method="post" action="/a/<%= agenda.slug %>/suara">
+    <%- include('partials/csrf') %>
     <label class="field">
       Nama panggilan
       <input type="text" name="name" value="<%= voteValues.name %>"

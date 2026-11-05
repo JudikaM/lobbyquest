@@ -45,7 +45,7 @@ test('input pengguna di-escape (XSS)', async () => {
   assert.match(page.text, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
 });
 
-test('form dengan format selain urlencoded ditolak', async () => {
+test('form dengan format selain urlencoded ditolak dengan 415', async () => {
   const response = await fetch(`${server.baseUrl}/agenda`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

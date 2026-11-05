@@ -3,6 +3,8 @@ const express = require('express');
 const { loadConfig } = require('./config');
 const routes = require('./routes');
 const { securityHeaders } = require('./security/headers');
+const { csrfProtection } = require('./security/csrf');
+const { requireFormBody } = require('./security/body');
 
 // Membuat aplikasi Express tanpa langsung mendengarkan port, sehingga bisa
 // dipakai oleh server maupun test.
@@ -16,7 +18,14 @@ function createApp({ config = loadConfig() } = {}) {
 
   app.use(securityHeaders(config));
   app.use(express.static(path.join(__dirname, 'public')));
+  // Halaman dinamis memuat token per browser, jadi tidak boleh di-cache.
+  app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+  });
+  app.use(requireFormBody);
   app.use(express.urlencoded({ extended: false, limit: '20kb' }));
+  app.use(csrfProtection(config));
   app.use(routes);
 
   app.use((req, res) => {
