@@ -62,7 +62,7 @@ function renderManageLogin(res, agenda, { error } = {}) {
   res.render('manage-login', { title: `Kelola ${agenda.title}`, noindex: true, agenda, error });
 }
 
-function renderAgenda(req, res, agenda, { voteValues, voteErrors = [] } = {}) {
+function renderAgenda(req, res, agenda, { voteValues, voteErrors = [], manageErrors = [] } = {}) {
   const participant = findCurrentParticipant(req, agenda);
   const manager = managerToken(req, agenda);
   const origin = publicOrigin(req);
@@ -84,6 +84,11 @@ function renderAgenda(req, res, agenda, { voteValues, voteErrors = [] } = {}) {
     agenda,
     kindLabel: agendas.KINDS[agenda.kind],
     timezoneLabel: `${TIMEZONES[agenda.timezone]} (${agenda.timezone})`,
+    status: agenda.status,
+    statusLabel: agendas.STATUS_LABELS[agenda.status],
+    finalLabel: agenda.finalOption
+      ? formatRange(agenda.finalOption.starts_at, agenda.finalOption.ends_at, agenda.timezone)
+      : null,
     timeOptions: agenda.timeOptions.map((option) => {
       const names = voters.get(option.id);
       return {
@@ -91,6 +96,8 @@ function renderAgenda(req, res, agenda, { voteValues, voteErrors = [] } = {}) {
         label: formatRange(option.starts_at, option.ends_at, agenda.timezone),
         voters: names,
         isTop: topCount > 0 && names.length === topCount,
+        isFinal: option.id === agenda.final_option_id,
+        canFinalize: Boolean(agendas.finalizableOption(agenda, String(option.id))),
       };
     }),
     participantCount: participants.participantCount(agenda.id),
@@ -108,6 +115,8 @@ function renderAgenda(req, res, agenda, { voteValues, voteErrors = [] } = {}) {
     managerUrl: manager ? `${origin}/a/${agenda.slug}/kelola#kode=${manager}` : null,
     managerCode: manager,
     managerWelcome: req.query.kelola === '1',
+    finalSaved: req.query.ditetapkan === '1',
+    manageErrors,
     justCreated: req.query.baru === '1',
     voteSaved: req.query.tersimpan === '1',
     privacyNotice: PRIVACY_NOTICE,
@@ -188,8 +197,39 @@ function createRouter(limiters) {
     res.redirect(303, `/a/${req.agenda.slug}`);
   });
 
+  router.post('/a/:slug/tetapkan', limiters.manage, requireManager, (req, res) => {
+    const { agenda } = req;
+    const option = agendas.finalizableOption(agenda, req.body.option);
+    if (agenda.status === 'done' || agenda.status === 'expired' || !option) {
+      res.status(422);
+      return renderAgenda(req, res, agenda, {
+        manageErrors: ['Pilih salah satu pilihan waktu yang belum dimulai.'],
+      });
+    }
+    agendas.setFinalOption(agenda, option.id);
+    res.redirect(303, `/a/${agenda.slug}?ditetapkan=1#status`);
+  });
+
+  router.post('/a/:slug/buka-voting', limiters.manage, requireManager, (req, res) => {
+    const { agenda } = req;
+    if (agenda.status !== 'scheduled') {
+      res.status(409);
+      return renderAgenda(req, res, agenda, {
+        manageErrors: ['Voting hanya bisa dibuka lagi sebelum agenda selesai.'],
+      });
+    }
+    agendas.setFinalOption(agenda, null);
+    res.redirect(303, `/a/${agenda.slug}#suara`);
+  });
+
   router.post('/a/:slug/suara', limiters.participate, (req, res) => {
     const { agenda } = req;
+    if (agenda.status !== 'voting') {
+      res.status(409);
+      return renderAgenda(req, res, agenda, {
+        voteErrors: ['Voting sudah ditutup untuk agenda ini.'],
+      });
+    }
     const { values, errors } = votes.validateVote(req.body, agenda);
     if (errors.length) {
       res.status(422);
