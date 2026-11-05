@@ -199,10 +199,16 @@ function finalizableOption(agenda, value, now = new Date()) {
 const updateFinal = db.prepare(
   'UPDATE agendas SET final_option_id = ?, finalized_at = ? WHERE id = ?'
 );
+const resetRsvps = db.prepare(
+  'UPDATE participants SET rsvp = NULL, rsvp_at = NULL WHERE agenda_id = ?'
+);
 
-// Menetapkan (optionId) atau membatalkan (null) waktu final.
+// Menetapkan (optionId) atau membatalkan (null) waktu final. Jika waktunya
+// berubah, konfirmasi kehadiran lama tidak berlaku lagi dan dikosongkan.
 const setFinalOption = db.transaction((agenda, optionId) => {
+  if (optionId === agenda.final_option_id) return;
   updateFinal.run(optionId, optionId ? new Date().toISOString() : null, agenda.id);
+  resetRsvps.run(agenda.id);
 });
 
 module.exports = {

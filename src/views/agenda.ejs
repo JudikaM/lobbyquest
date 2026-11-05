@@ -56,6 +56,68 @@
   </ol>
 </article>
 
+<% if (status === 'scheduled' || status === 'done') { %>
+<section class="rsvp" id="hadir" aria-labelledby="hadir-judul">
+  <h2 id="hadir-judul">Konfirmasi kehadiran</h2>
+
+  <ul class="rsvp-summary">
+    <% Object.entries(rsvpLabels).forEach(([key, label]) => { %>
+    <li class="rsvp-group rsvp-<%= key %>">
+      <span class="rsvp-count"><%= rsvpSummary[key].length %></span>
+      <span class="rsvp-label"><%= label %></span>
+      <% if (rsvpSummary[key].length) { %>
+      <span class="rsvp-names"><%= rsvpSummary[key].join(', ') %></span>
+      <% } %>
+    </li>
+    <% }) %>
+  </ul>
+  <% if (rsvpSummary.pending.length) { %>
+  <p class="note">Belum konfirmasi: <%= rsvpSummary.pending.join(', ') %></p>
+  <% } %>
+
+  <% if (rsvpSaved) { %>
+  <p class="success" role="status">Konfirmasimu sudah disimpan.</p>
+  <% } %>
+  <% if (rsvpErrors.length) { %>
+  <div class="errors" role="alert">
+    <p>Konfirmasi belum disimpan:</p>
+    <ul>
+      <% rsvpErrors.forEach((error) => { %>
+      <li><%= error %></li>
+      <% }) %>
+    </ul>
+  </div>
+  <% } %>
+
+  <% if (status === 'scheduled') { %>
+  <form class="form" method="post" action="/a/<%= agenda.slug %>/hadir">
+    <%- include('partials/csrf') %>
+    <label class="field">
+      Nama panggilan
+      <input type="text" name="name" value="<%= rsvpValues.name %>"
+        required maxlength="<%= nameMax %>" placeholder="Contoh: Budi" autocomplete="nickname">
+      <small>Nama dan konfirmasimu terlihat oleh siapa pun yang memiliki tautan.</small>
+    </label>
+    <fieldset class="field">
+      <legend>Kamu ikut?</legend>
+      <div class="choices rsvp-choices">
+        <% Object.entries(rsvpLabels).forEach(([key, label]) => { %>
+        <label class="choice">
+          <input type="radio" name="status" value="<%= key %>" required
+            <%= rsvpValues.status === key ? 'checked' : '' %>>
+          <%= label %>
+        </label>
+        <% }) %>
+      </div>
+    </fieldset>
+    <button type="submit" class="primary-button">
+      <%= participant && participant.rsvp ? 'Perbarui konfirmasi' : 'Kirim konfirmasi' %>
+    </button>
+  </form>
+  <% } %>
+</section>
+<% } %>
+
 <% if (status === 'voting') { %>
 <section class="vote" id="suara">
   <h2><%= participant ? 'Ubah pilihanmu' : 'Pilih waktu yang kamu bisa' %></h2>
