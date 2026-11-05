@@ -12,9 +12,10 @@ friends: propose times, let friends vote, lock in the final time, and run a
 ready check. Interface in Indonesian.*
 
 <p align="center">
-  <img src="docs/screenshots/home.png" alt="Beranda LobbyQuest di ponsel" width="220">
-  <img src="docs/screenshots/voting-dark.png" alt="Hasil voting dengan bar ketersediaan, mode gelap" width="220">
-  <img src="docs/screenshots/ready-check.png" alt="Waktu final, hitung mundur, dan ready check dengan kuota party" width="220">
+  <img src="docs/screenshots/home.png" alt="Beranda LobbyQuest, tema terang" width="200">
+  <img src="docs/screenshots/voting-light.png" alt="Panel pengelola dan hasil voting, tema terang" width="200">
+  <img src="docs/screenshots/ready-check.png" alt="Waktu final, hitung mundur, dan ready check, tema gelap" width="200">
+  <img src="docs/screenshots/create-form.png" alt="Form buat agenda dengan pratinjau langsung" width="200">
 </p>
 
 ## Fitur
@@ -142,11 +143,12 @@ src/
 ├── time.js            # konversi zona waktu dan format tanggal
 ├── urls.js            # origin publik untuk URL absolut
 ├── security/          # headers (CSP), CSRF, rate limit, cookie, body
+├── ui/                # helper ikon Lucide (icons.js, icon-names.js, registry)
 ├── db/
 │   ├── index.js       # koneksi SQLite dan runner migrasi
 │   └── migrations/    # file .sql berurutan, dijalankan otomatis saat start
-├── views/             # template EJS
-└── public/            # CSS, JavaScript modul, font, ikon, gambar preview
+├── views/             # template EJS (partials/ui berisi komponen bersama)
+└── public/            # app.css (token + komponen), app.js, font, ikon, gambar
 test/                  # test node:test (unit + integrasi HTTP)
 ```
 
@@ -182,6 +184,40 @@ test/                  # test node:test (unit + integrasi HTTP)
 
 Lihat [SECURITY.md](SECURITY.md) untuk cara melaporkan celah keamanan.
 
+## Sistem desain
+
+Antarmuka memakai sistem desain internal bernama **Ready Room**: permukaan
+netral ala shadcn/ui (`background`/`card`/`muted`/`border`/`ring`, dan
+seterusnya) dipadukan dengan satu warna sinyal, **Volt**, untuk momen
+penting seperti status *siap* dan tombol utama. Semua token warna, radius,
+spacing, dan tipografi ada sebagai CSS custom property di
+[`src/public/app.css`](src/public/app.css); setiap token dan komponen bisa
+dilihat langsung di halaman **[`/desain`](/desain)** saat aplikasi berjalan.
+
+- **Tipografi.** [Geist dan Geist Mono](https://github.com/vercel/geist-font),
+  di-subset ke glyph yang dipakai dan di-host sendiri dengan `font-display:
+  swap` (total sekitar 26 KB).
+- **Ikon.** Seluruhnya dari [Lucide](https://lucide.dev) (set ikon shadcn/ui)
+  lewat paket `lucide-static`, dirender sebagai SVG inline oleh
+  `src/ui/icons.js`. Tidak ada ikon dimuat dari CDN.
+- **Komponen.** Button, input, card, badge, alert, toast, dialog/sheet
+  (dibangun di atas `<dialog>` asli), tabs, avatar, progress, dan skeleton,
+  semuanya CSS + partial EJS tanpa library JavaScript. `src/public/app.js`
+  hanya menambah peningkatan progresif (toast, dialog, tab, tooltip);
+  setiap halaman tetap berfungsi tanpa JavaScript.
+- **Mode gelap/terang.** Mengikuti preferensi sistem secara default, dengan
+  toggle manual yang diingat lewat cookie preferensi tampilan (bukan data
+  pribadi) dan dibaca di server agar halaman langsung tampil benar tanpa
+  kedipan.
+- **Aksesibilitas.** Target sentuh minimal 44px, fokus selalu terlihat,
+  navigasi keyboard penuh (menu, tab, dialog), dan diperiksa dengan
+  [axe-core](https://github.com/dequelabs/axe-core) di setiap halaman, tema,
+  dan lebar layar (375/768/1440px) — nol pelanggaran WCAG 2.1/2.2 AA pada
+  commit saat ini.
+
+Atribusi lengkap pihak ketiga (lisensi ISC Lucide, MIT Feather, dan OFL
+Geist) ada di [NOTICE.md](NOTICE.md).
+
 ## Berkontribusi
 
 Kontribusi sangat diterima. Baca [CONTRIBUTING.md](CONTRIBUTING.md) untuk alur
@@ -190,5 +226,5 @@ perubahan ada di [CHANGELOG.md](CHANGELOG.md).
 
 ## Lisensi
 
-[MIT](LICENSE). Font Geist dan Geist Mono disertakan di bawah
-[SIL Open Font License 1.1](src/public/fonts/OFL-geist.txt).
+[MIT](LICENSE). Ikon, font, dan aset pihak ketiga lainnya memakai lisensinya
+masing-masing — lihat [NOTICE.md](NOTICE.md).
