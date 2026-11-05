@@ -4,6 +4,7 @@ const votes = require('./votes');
 const participants = require('./participants');
 const managers = require('./managers');
 const rsvp = require('./rsvp');
+const { initial, avatarClass, fillClass } = require('./presenters');
 const { TIMEZONES, DEFAULT_TIMEZONE, formatRange, formatDate, utcToLocalInput } = require('./time');
 const { readCookie, cookieOptions } = require('./security/cookies');
 const { publicOrigin } = require('./urls');
@@ -84,6 +85,8 @@ function renderAgenda(req, res, agenda, {
   const origin = publicOrigin(req);
   const optionIds = votes.participantOptionIds(participant);
   const voters = votes.tallyVotes(agenda);
+  const members = participants.listParticipants(agenda.id);
+  const count = members.length;
   const topCount = Math.max(0, ...[...voters.values()].map((names) => names.length));
 
   // noindex hanya meminta mesin pencari tidak mengindeks; ini bukan kontrol
@@ -109,6 +112,9 @@ function renderAgenda(req, res, agenda, {
       const names = voters.get(option.id);
       return {
         id: option.id,
+        startsAt: option.starts_at,
+        endsAt: option.ends_at,
+        fill: fillClass(names.length, count),
         label: formatRange(option.starts_at, option.ends_at, agenda.timezone),
         voters: names,
         isTop: topCount > 0 && names.length === topCount,
@@ -116,7 +122,14 @@ function renderAgenda(req, res, agenda, {
         canFinalize: Boolean(agendas.finalizableOption(agenda, String(option.id))),
       };
     }),
-    participantCount: participants.participantCount(agenda.id),
+    participantCount: count,
+    party: members.map((member) => ({
+      name: member.name,
+      rsvp: member.rsvp,
+      initial: initial(member.name),
+      avatar: avatarClass(member.id),
+      isYou: Boolean(participant && participant.id === member.id),
+    })),
     participant,
     voteValues: voteValues || {
       name: participant ? participant.name : '',

@@ -1,12 +1,16 @@
-<%- include('partials/header') %>
+<%- include('partials/header', { hideHeaderCta: true }) %>
 
-<h1>Buat agenda</h1>
+<header class="page-head">
+  <p class="eyebrow">Lobby baru</p>
+  <h1>Buat agenda</h1>
+  <p class="lead">Isi detailnya, tambahkan beberapa pilihan waktu, lalu bagikan tautannya.</p>
+</header>
 
-<p class="notice"><%= privacyNotice %></p>
+<p class="flash flash-notice"><%= privacyNotice %></p>
 
 <% if (errors.length) { %>
-<div class="errors" role="alert">
-  <p>Agenda belum disimpan. Periksa kembali isian berikut:</p>
+<div class="flash flash-error" role="alert" tabindex="-1" data-focus-on-load>
+  <p><strong>Agenda belum disimpan.</strong> Periksa kembali isian berikut:</p>
   <ul>
     <% errors.forEach((error) => { %>
     <li><%= error %></li>
@@ -17,68 +21,80 @@
 
 <form class="form" method="post" action="/agenda">
   <%- include('partials/csrf') %>
-  <label class="field">
-    Judul
-    <input type="text" name="title" value="<%= values.title %>"
-      required minlength="<%= limits.titleMin %>" maxlength="<%= limits.title %>"
-      placeholder="Contoh: Mabar ranked Sabtu malam">
-  </label>
 
-  <fieldset class="field">
-    <legend>Jenis</legend>
-    <div class="choices">
-      <% Object.entries(kinds).forEach(([value, label]) => { %>
-      <label class="choice">
-        <input type="radio" name="kind" value="<%= value %>" required
-          <%= values.kind === value ? 'checked' : '' %>>
-        <%= label %>
-      </label>
-      <% }) %>
+  <section class="panel">
+    <h2 class="panel-title">Detail</h2>
+
+    <div class="field">
+      <label for="title">Judul</label>
+      <input id="title" type="text" name="title" value="<%= values.title %>"
+        required minlength="<%= limits.titleMin %>" maxlength="<%= limits.title %>"
+        placeholder="Contoh: Mabar ranked Sabtu malam" autocomplete="off">
     </div>
-  </fieldset>
 
-  <label class="field">
-    <span>Deskripsi <span class="optional">(opsional)</span></span>
-    <textarea name="description" rows="3" maxlength="<%= limits.description %>"><%= values.description %></textarea>
-  </label>
+    <fieldset class="field">
+      <legend>Jenis</legend>
+      <div class="kind-picker">
+        <% Object.entries(kinds).forEach(([value, label]) => { %>
+        <label class="kind-option">
+          <input type="radio" name="kind" value="<%= value %>" required
+            <%= values.kind === value ? 'checked' : '' %>>
+          <span class="kind-icon" aria-hidden="true"><%= value === 'mabar' ? '🎮' : '☕' %></span>
+          <span class="kind-label"><%= label %></span>
+          <span class="kind-hint"><%= value === 'mabar' ? 'Main game bareng' : 'Ketemuan santai' %></span>
+        </label>
+        <% }) %>
+      </div>
+    </fieldset>
 
-  <label class="field">
-    <span>Lokasi umum atau platform <span class="optional">(opsional)</span></span>
-    <input type="text" name="location" value="<%= values.location %>"
-      maxlength="<%= limits.location %>" placeholder="Contoh: Discord, atau kafe di Blok M">
-    <small>Cukup lokasi umum. Jangan tulis alamat rumah.</small>
-  </label>
+    <div class="field">
+      <label for="description">Deskripsi <span class="optional">(opsional)</span></label>
+      <textarea id="description" name="description" rows="3" maxlength="<%= limits.description %>"
+        placeholder="Contoh: Bawa headset. Target naik ke Legend."><%= values.description %></textarea>
+    </div>
 
-  <label class="field">
-    Zona waktu
-    <select name="timezone">
-      <% Object.entries(timezones).forEach(([value, label]) => { %>
-      <option value="<%= value %>" <%= values.timezone === value ? 'selected' : '' %>>
-        <%= label %> (<%= value %>)
-      </option>
-      <% }) %>
-    </select>
-  </label>
+    <div class="field">
+      <label for="location">Lokasi umum atau platform <span class="optional">(opsional)</span></label>
+      <input id="location" type="text" name="location" value="<%= values.location %>"
+        maxlength="<%= limits.location %>" placeholder="Contoh: Discord, atau kafe di Blok M"
+        aria-describedby="location-hint" autocomplete="off">
+      <small id="location-hint">Cukup lokasi umum. Jangan tulis alamat rumah.</small>
+    </div>
+  </section>
 
-  <fieldset class="field">
-    <legend>Pilihan waktu</legend>
-    <small>
-      Isi 2 sampai <%= maxSlots %> pilihan di masa depan, dalam zona waktu yang dipilih di atas.
+  <section class="panel">
+    <h2 class="panel-title">Pilihan waktu</h2>
+
+    <div class="field">
+      <label for="timezone">Zona waktu</label>
+      <select id="timezone" name="timezone" data-timezone-select>
+        <% Object.entries(timezones).forEach(([value, label]) => { %>
+        <option value="<%= value %>" <%= values.timezone === value ? 'selected' : '' %>>
+          <%= label %> (<%= value %>)
+        </option>
+        <% }) %>
+      </select>
+    </div>
+
+    <p class="hint" id="slots-hint">
+      Isi 2 sampai <%= maxSlots %> pilihan di masa depan, dalam zona waktu di atas.
       Baris yang kosong diabaikan.
-    </small>
-    <div class="slots" data-slots data-max="<%= maxSlots %>">
+    </p>
+    <div class="slots" data-slots data-max="<%= maxSlots %>" aria-describedby="slots-hint">
       <% values.slots.forEach((slot, i) => { %>
       <%- include('partials/slot-row', { slot, number: i + 1 }) %>
       <% }) %>
     </div>
-    <button type="button" class="secondary-button" data-add-slot hidden>+ Tambah pilihan waktu</button>
-  </fieldset>
+    <button type="button" class="button button-secondary" data-add-slot hidden>+ Tambah pilihan waktu</button>
+  </section>
 
   <template id="slot-template">
     <%- include('partials/slot-row', { slot: { start: '', end: '' }, number: '' }) %>
   </template>
 
-  <button type="submit" class="primary-button">Buat agenda</button>
+  <div class="form-actions">
+    <button type="submit" class="button button-primary button-large">Buat agenda</button>
+  </div>
 </form>
 
 <script type="module" src="/agenda-form.js"></script>

@@ -66,6 +66,14 @@ function upsertParticipant(agendaId, participant, name, now) {
   return { id: lastInsertRowid, token };
 }
 
+const selectParticipants = db.prepare(
+  'SELECT id, name, rsvp FROM participants WHERE agenda_id = ? ORDER BY created_at, id'
+);
+
+function listParticipants(agendaId) {
+  return selectParticipants.all(agendaId);
+}
+
 const deleteParticipantStatement = db.prepare('DELETE FROM participants WHERE id = ?');
 
 // Menghapus peserta beserta suara dan konfirmasinya (cascade).
@@ -87,5 +95,6 @@ module.exports = {
   findParticipant,
   upsertParticipant,
   deleteParticipant,
+  listParticipants,
   participantCount,
 };

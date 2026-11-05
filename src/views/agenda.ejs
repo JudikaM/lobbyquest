@@ -1,198 +1,224 @@
 <%- include('partials/header') %>
 
 <% if (justCreated) { %>
-<p class="success" role="status">Agenda berhasil dibuat. Bagikan tautan di bawah ke teman-temanmu.</p>
+<div class="flash flash-success" role="status">
+  <p><strong>Lobby siap!</strong> Bagikan tautan di bawah ke teman-temanmu supaya mereka bisa memilih waktu.</p>
+</div>
+<%- include('partials/share') %>
+<% } %>
+<% if (leftAgenda) { %>
+<p class="flash flash-success" role="status">Nama, suara, dan konfirmasimu sudah dihapus dari agenda ini.</p>
 <% } %>
 
-<article class="agenda">
-  <p class="badge"><%= kindLabel %></p>
-  <h1><%= agenda.title %></h1>
+<article class="lobby" aria-labelledby="agenda-judul">
+  <header class="panel lobby-head">
+    <p class="lobby-kicker">
+      <span class="kind-badge kind-<%= agenda.kind %>"><span aria-hidden="true"><%= agenda.kind === 'mabar' ? '🎮' : '☕' %></span> <%= kindLabel %></span>
+      <span class="status-pill status-<%= status %>"><%= statusLabel %></span>
+    </p>
+    <h1 id="agenda-judul"><%= agenda.title %></h1>
 
-  <% if (agenda.description) { %>
-  <p class="description"><%= agenda.description %></p>
-  <% } %>
+    <% if (agenda.description) { %>
+    <p class="description"><%= agenda.description %></p>
+    <% } %>
 
-  <% if (agenda.location) { %>
-  <p><strong>Lokasi/platform:</strong> <%= agenda.location %></p>
-  <% } %>
+    <dl class="lobby-meta">
+      <% if (agenda.location) { %>
+      <div><dt>Lokasi/platform</dt><dd><%= agenda.location %></dd></div>
+      <% } %>
+      <div><dt>Zona waktu</dt><dd><%= timezoneLabel %></dd></div>
+      <div><dt>Party</dt><dd><%= participantCount %> orang</dd></div>
+    </dl>
 
-  <section class="status" id="status" aria-labelledby="status-judul">
-    <h2 id="status-judul" class="visually-hidden">Status agenda</h2>
-    <p class="status-pill status-<%= status %>"><%= statusLabel %></p>
     <ol class="status-steps" aria-label="Tahapan agenda">
       <li class="<%= status === 'voting' ? 'is-current' : 'is-done' %>"<% if (status === 'voting') { %> aria-current="step"<% } %>>Voting</li>
       <li class="<%= status === 'scheduled' ? 'is-current' : (status === 'done' ? 'is-done' : '') %>"<% if (status === 'scheduled') { %> aria-current="step"<% } %>>Waktu ditetapkan</li>
       <li class="<%= status === 'done' ? 'is-current' : '' %>"<% if (status === 'done') { %> aria-current="step"<% } %>>Selesai</li>
     </ol>
+  </header>
+
+  <section class="status" id="status" aria-labelledby="status-judul">
+    <h2 id="status-judul" class="visually-hidden">Status agenda</h2>
     <% if (finalSaved) { %>
-    <p class="success" role="status">Waktu final sudah ditetapkan.</p>
+    <p class="flash flash-success" role="status">Waktu final sudah ditetapkan. Teman-temanmu sekarang bisa ready check.</p>
     <% } %>
     <% if (finalLabel) { %>
-    <div class="final-time">
-      <p class="final-label"><%= status === 'done' ? 'Sudah berlangsung' : 'Waktu final' %></p>
-      <p class="final-value"><%= finalLabel %></p>
+    <div class="panel final-time final-<%= status %>">
+      <p class="panel-title"><%= status === 'done' ? 'Sudah berlangsung' : 'Waktu final' %></p>
+      <p class="final-value" data-local-time data-start="<%= agenda.finalOption.starts_at %>" data-end="<%= agenda.finalOption.ends_at %>"><%= finalLabel %></p>
     </div>
     <% } else if (status === 'expired') { %>
-    <p class="note">Semua pilihan waktu sudah lewat tanpa waktu final.</p>
+    <p class="flash flash-notice">Semua pilihan waktu sudah lewat tanpa waktu final.</p>
     <% } %>
   </section>
 
-  <h2>Pilihan waktu</h2>
-  <p class="note">
-    <%= participantCount %> orang sudah memilih. Semua waktu ditampilkan dalam <%= timezoneLabel %>.
-  </p>
-  <ol class="time-options">
-    <% timeOptions.forEach((option) => { %>
-    <li class="<%= option.isTop ? 'is-top' : '' %> <%= option.isFinal ? 'is-final' : '' %>">
-      <span class="time-label"><%= option.label %><% if (option.isFinal) { %> <strong class="tag">Final</strong><% } %></span>
-      <span class="vote-count">
-        <%= option.voters.length %> bisa<% if (option.isTop) { %> · paling banyak dipilih<% } %>
-      </span>
-      <% if (option.voters.length) { %>
-      <span class="voters"><%= option.voters.join(', ') %></span>
-      <% } %>
-    </li>
-    <% }) %>
-  </ol>
+  <% if (status === 'scheduled' || status === 'done') { %>
+  <section class="panel rsvp" id="hadir" aria-labelledby="hadir-judul">
+    <h2 id="hadir-judul" class="panel-title">Ready check <span class="panel-subtitle">Konfirmasi kehadiran</span></h2>
+
+    <ul class="rsvp-summary">
+      <% Object.entries(rsvpLabels).forEach(([key, label]) => { %>
+      <li class="rsvp-group rsvp-<%= key %>">
+        <span class="rsvp-count"><%= rsvpSummary[key].length %></span>
+        <span class="rsvp-label"><%= label %></span>
+        <% if (rsvpSummary[key].length) { %>
+        <span class="rsvp-names"><%= rsvpSummary[key].join(', ') %></span>
+        <% } %>
+      </li>
+      <% }) %>
+    </ul>
+    <% if (rsvpSummary.pending.length) { %>
+    <p class="hint">Belum konfirmasi: <%= rsvpSummary.pending.join(', ') %></p>
+    <% } %>
+
+    <% if (rsvpSaved) { %>
+    <p class="flash flash-success" role="status">Konfirmasimu sudah disimpan.</p>
+    <% } %>
+    <% if (rsvpErrors.length) { %>
+    <div class="flash flash-error" role="alert" tabindex="-1" data-focus-on-load>
+      <p><strong>Konfirmasi belum disimpan:</strong></p>
+      <ul>
+        <% rsvpErrors.forEach((error) => { %>
+        <li><%= error %></li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } %>
+
+    <% if (status === 'scheduled') { %>
+    <form class="form" method="post" action="/a/<%= agenda.slug %>/hadir">
+      <%- include('partials/csrf') %>
+      <div class="field">
+        <label for="rsvp-name">Nama panggilan</label>
+        <input id="rsvp-name" type="text" name="name" value="<%= rsvpValues.name %>"
+          required maxlength="<%= nameMax %>" placeholder="Contoh: Budi" autocomplete="nickname"
+          aria-describedby="rsvp-name-hint">
+        <small id="rsvp-name-hint">Nama dan konfirmasimu terlihat oleh siapa pun yang memiliki tautan.</small>
+      </div>
+      <fieldset class="field">
+        <legend>Kamu ikut?</legend>
+        <div class="segmented rsvp-choices">
+          <% Object.entries(rsvpLabels).forEach(([key, label]) => { %>
+          <label class="segment segment-<%= key %>">
+            <input type="radio" name="status" value="<%= key %>" required
+              <%= rsvpValues.status === key ? 'checked' : '' %>>
+            <span class="segment-icon" aria-hidden="true"><%= key === 'yes' ? '✓' : (key === 'maybe' ? '?' : '✕') %></span>
+            <span><%= label %></span>
+          </label>
+          <% }) %>
+        </div>
+      </fieldset>
+      <button type="submit" class="button button-primary">
+        <%= participant && participant.rsvp ? 'Perbarui konfirmasi' : 'Kirim konfirmasi' %>
+      </button>
+    </form>
+    <% } %>
+  </section>
+  <% } %>
+
+  <section class="panel" aria-labelledby="hasil-judul">
+    <h2 id="hasil-judul" class="panel-title">Hasil voting <span class="panel-subtitle"><%= participantCount %> orang sudah memilih</span></h2>
+    <p class="hint">Semua waktu dalam <%= timezoneLabel %>.<span data-local-zone-note></span></p>
+    <ol class="time-options">
+      <% timeOptions.forEach((option) => { %>
+      <li class="time-option<%= option.isTop ? ' is-top' : '' %><%= option.isFinal ? ' is-final' : '' %>">
+        <div class="time-option-head">
+          <span class="time-label" data-local-time data-start="<%= option.startsAt %>" data-end="<%= option.endsAt %>"><%= option.label %></span>
+          <% if (option.isFinal) { %><strong class="tag tag-final">Final</strong><% } else if (option.isTop) { %><span class="tag tag-top">Paling banyak dipilih</span><% } %>
+        </div>
+        <div class="bar" aria-hidden="true"><span class="bar-fill <%= option.fill %>"></span></div>
+        <p class="vote-count"><strong><%= option.voters.length %></strong> bisa<% if (option.voters.length) { %>: <span class="voters"><%= option.voters.join(', ') %></span><% } %></p>
+      </li>
+      <% }) %>
+    </ol>
+  </section>
+
+  <% if (status === 'voting') { %>
+  <section class="panel vote" id="suara" aria-labelledby="suara-judul">
+    <h2 id="suara-judul" class="panel-title"><%= participant ? 'Ubah pilihanmu' : 'Gabung & pilih waktu' %></h2>
+
+    <% if (voteSaved) { %>
+    <p class="flash flash-success" role="status">Pilihanmu sudah disimpan.</p>
+    <% } %>
+
+    <% if (voteErrors.length) { %>
+    <div class="flash flash-error" role="alert" tabindex="-1" data-focus-on-load>
+      <p><strong>Pilihan belum disimpan:</strong></p>
+      <ul>
+        <% voteErrors.forEach((error) => { %>
+        <li><%= error %></li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } %>
+
+    <form class="form" method="post" action="/a/<%= agenda.slug %>/suara">
+      <%- include('partials/csrf') %>
+      <div class="field">
+        <label for="vote-name">Nama panggilan</label>
+        <input id="vote-name" type="text" name="name" value="<%= voteValues.name %>"
+          required maxlength="<%= nameMax %>" placeholder="Contoh: Budi" autocomplete="nickname"
+          aria-describedby="vote-name-hint">
+        <small id="vote-name-hint">Nama dan pilihanmu terlihat oleh siapa pun yang memiliki tautan.</small>
+      </div>
+
+      <fieldset class="field">
+        <legend>Waktu yang kamu bisa</legend>
+        <small>Centang semua yang cocok. Kosongkan jika tidak ada yang bisa.</small>
+        <div class="toggle-list">
+          <% timeOptions.forEach((option) => { %>
+          <label class="toggle-row">
+            <input type="checkbox" name="option" value="<%= option.id %>"
+              <%= voteValues.optionIds.includes(option.id) ? 'checked' : '' %>>
+            <span data-local-time data-start="<%= option.startsAt %>" data-end="<%= option.endsAt %>"><%= option.label %></span>
+          </label>
+          <% }) %>
+        </div>
+      </fieldset>
+
+      <button type="submit" class="button button-primary">
+        <%= participant ? 'Perbarui pilihan' : 'Simpan pilihan' %>
+      </button>
+    </form>
+  </section>
+  <% } %>
+
+  <% if (party.length) { %>
+  <section class="panel" aria-labelledby="party-judul">
+    <h2 id="party-judul" class="panel-title">Party <span class="panel-subtitle"><%= party.length %> anggota</span></h2>
+    <ul class="party">
+      <% party.forEach((member) => { %>
+      <li class="party-member<%= member.isYou ? ' is-you' : '' %>">
+        <span class="avatar <%= member.avatar %>" aria-hidden="true"><%= member.initial %></span>
+        <span class="party-name"><%= member.name %><% if (member.isYou) { %> <span class="you">(kamu)</span><% } %></span>
+        <% if (member.rsvp) { %>
+        <span class="party-rsvp rsvp-<%= member.rsvp %>"><%= rsvpLabels[member.rsvp] %></span>
+        <% } %>
+      </li>
+      <% }) %>
+    </ul>
+    <% if (participant) { %>
+    <form class="leave" method="post" action="/a/<%= agenda.slug %>/keluar">
+      <%- include('partials/csrf') %>
+      <p class="hint">
+        Kamu tercatat sebagai <strong><%= participant.name %></strong> di browser ini.
+        <button type="submit" class="link-button">Hapus namaku dari agenda ini</button>
+      </p>
+    </form>
+    <% } %>
+  </section>
+  <% } %>
 </article>
 
-<% if (status === 'scheduled' || status === 'done') { %>
-<section class="rsvp" id="hadir" aria-labelledby="hadir-judul">
-  <h2 id="hadir-judul">Konfirmasi kehadiran</h2>
-
-  <ul class="rsvp-summary">
-    <% Object.entries(rsvpLabels).forEach(([key, label]) => { %>
-    <li class="rsvp-group rsvp-<%= key %>">
-      <span class="rsvp-count"><%= rsvpSummary[key].length %></span>
-      <span class="rsvp-label"><%= label %></span>
-      <% if (rsvpSummary[key].length) { %>
-      <span class="rsvp-names"><%= rsvpSummary[key].join(', ') %></span>
-      <% } %>
-    </li>
-    <% }) %>
-  </ul>
-  <% if (rsvpSummary.pending.length) { %>
-  <p class="note">Belum konfirmasi: <%= rsvpSummary.pending.join(', ') %></p>
-  <% } %>
-
-  <% if (rsvpSaved) { %>
-  <p class="success" role="status">Konfirmasimu sudah disimpan.</p>
-  <% } %>
-  <% if (rsvpErrors.length) { %>
-  <div class="errors" role="alert">
-    <p>Konfirmasi belum disimpan:</p>
-    <ul>
-      <% rsvpErrors.forEach((error) => { %>
-      <li><%= error %></li>
-      <% }) %>
-    </ul>
-  </div>
-  <% } %>
-
-  <% if (status === 'scheduled') { %>
-  <form class="form" method="post" action="/a/<%= agenda.slug %>/hadir">
-    <%- include('partials/csrf') %>
-    <label class="field">
-      Nama panggilan
-      <input type="text" name="name" value="<%= rsvpValues.name %>"
-        required maxlength="<%= nameMax %>" placeholder="Contoh: Budi" autocomplete="nickname">
-      <small>Nama dan konfirmasimu terlihat oleh siapa pun yang memiliki tautan.</small>
-    </label>
-    <fieldset class="field">
-      <legend>Kamu ikut?</legend>
-      <div class="choices rsvp-choices">
-        <% Object.entries(rsvpLabels).forEach(([key, label]) => { %>
-        <label class="choice">
-          <input type="radio" name="status" value="<%= key %>" required
-            <%= rsvpValues.status === key ? 'checked' : '' %>>
-          <%= label %>
-        </label>
-        <% }) %>
-      </div>
-    </fieldset>
-    <button type="submit" class="primary-button">
-      <%= participant && participant.rsvp ? 'Perbarui konfirmasi' : 'Kirim konfirmasi' %>
-    </button>
-  </form>
-  <% } %>
-</section>
-<% } %>
-
-<% if (status === 'voting') { %>
-<section class="vote" id="suara">
-  <h2><%= participant ? 'Ubah pilihanmu' : 'Pilih waktu yang kamu bisa' %></h2>
-
-  <% if (voteSaved) { %>
-  <p class="success" role="status">Pilihanmu sudah disimpan.</p>
-  <% } %>
-
-  <% if (voteErrors.length) { %>
-  <div class="errors" role="alert">
-    <p>Pilihan belum disimpan:</p>
-    <ul>
-      <% voteErrors.forEach((error) => { %>
-      <li><%= error %></li>
-      <% }) %>
-    </ul>
-  </div>
-  <% } %>
-
-  <form class="form" method="post" action="/a/<%= agenda.slug %>/suara">
-    <%- include('partials/csrf') %>
-    <label class="field">
-      Nama panggilan
-      <input type="text" name="name" value="<%= voteValues.name %>"
-        required maxlength="<%= nameMax %>" placeholder="Contoh: Budi">
-      <small>Nama dan pilihanmu terlihat oleh siapa pun yang memiliki tautan.</small>
-    </label>
-
-    <fieldset class="field">
-      <legend>Waktu yang kamu bisa</legend>
-      <small>Centang semua yang cocok. Kosongkan jika tidak ada yang bisa.</small>
-      <div class="vote-options">
-        <% timeOptions.forEach((option) => { %>
-        <label class="choice">
-          <input type="checkbox" name="option" value="<%= option.id %>"
-            <%= voteValues.optionIds.includes(option.id) ? 'checked' : '' %>>
-          <%= option.label %>
-        </label>
-        <% }) %>
-      </div>
-    </fieldset>
-
-    <button type="submit" class="primary-button">
-      <%= participant ? 'Perbarui pilihan' : 'Simpan pilihan' %>
-    </button>
-  </form>
-</section>
-<% } %>
-
-<% if (leftAgenda) { %>
-<p class="success" role="status">Nama, suara, dan konfirmasimu sudah dihapus dari agenda ini.</p>
-<% } %>
-
-<% if (participant) { %>
-<section class="leave" aria-label="Data kamu di agenda ini">
-  <form method="post" action="/a/<%= agenda.slug %>/keluar">
-    <%- include('partials/csrf') %>
-    <p class="note">
-      Kamu tercatat sebagai <strong><%= participant.name %></strong> di browser ini.
-      <button type="submit" class="link-button">Hapus namaku dari agenda ini</button>
-    </p>
-  </form>
-</section>
-<% } %>
-
 <% if (isManager) { %>
-<section class="manage" id="kelola" aria-labelledby="kelola-judul">
-  <h2 id="kelola-judul">Panel pengelola</h2>
+<section class="panel manage" id="kelola" aria-labelledby="kelola-judul">
+  <h2 id="kelola-judul" class="panel-title">Panel pengelola <span class="panel-subtitle">Hanya kamu yang melihat bagian ini</span></h2>
   <% if (managerWelcome) { %>
-  <p class="success" role="status">Kamu masuk sebagai pengelola agenda ini.</p>
+  <p class="flash flash-success" role="status">Kamu masuk sebagai pengelola agenda ini.</p>
   <% } %>
-  <p class="note">Hanya kamu yang melihat bagian ini.</p>
 
   <% if (manageErrors.length) { %>
-  <div class="errors" role="alert">
+  <div class="flash flash-error" role="alert" tabindex="-1" data-focus-on-load>
     <ul>
       <% manageErrors.forEach((error) => { %>
       <li><%= error %></li>
@@ -207,59 +233,61 @@
     <fieldset class="field">
       <legend><%= status === 'scheduled' ? 'Ganti waktu final' : 'Tetapkan waktu final' %></legend>
       <small>Pilih dari hasil voting. Hanya pilihan yang belum dimulai yang bisa ditetapkan.</small>
-      <div class="vote-options">
+      <div class="toggle-list">
         <% timeOptions.forEach((option) => { %>
-        <label class="choice">
+        <label class="toggle-row<%= option.canFinalize ? '' : ' is-disabled' %>">
           <input type="radio" name="option" value="<%= option.id %>" required
             <%= option.canFinalize ? '' : 'disabled' %>
             <%= (option.isFinal || (!finalLabel && option.isTop)) && option.canFinalize ? 'checked' : '' %>>
-          <span><%= option.label %> · <%= option.voters.length %> bisa</span>
+          <span><%= option.label %> · <strong><%= option.voters.length %></strong> bisa</span>
         </label>
         <% }) %>
       </div>
     </fieldset>
-    <button type="submit" class="primary-button">
-      <%= status === 'scheduled' ? 'Simpan waktu final' : 'Tetapkan waktu' %>
-    </button>
+    <div class="button-row">
+      <button type="submit" class="button button-primary">
+        <%= status === 'scheduled' ? 'Simpan waktu final' : 'Tetapkan waktu' %>
+      </button>
+    </div>
   </form>
   <% } %>
 
   <% if (status === 'scheduled') { %>
   <form method="post" action="/a/<%= agenda.slug %>/buka-voting">
     <%- include('partials/csrf') %>
-    <button type="submit" class="secondary-button">Buka voting lagi</button>
+    <button type="submit" class="button button-secondary">Buka voting lagi</button>
   </form>
   <% } %>
 
-  <details class="manager-link">
+  <details class="disclosure">
     <summary>Kelola dari perangkat lain</summary>
-    <p class="note">
-      Simpan tautan ini di tempat aman dan jangan dibagikan. Siapa pun yang
-      memilikinya bisa mengelola agenda ini.
+    <p class="hint">
+      Simpan tautan ini di tempat aman dan jangan dibagikan ke grup. Siapa pun
+      yang memilikinya bisa mengelola agenda ini.
     </p>
-    <label class="field">
-      Tautan pengelola
-      <input type="text" value="<%= managerUrl %>" readonly data-select-on-focus>
-    </label>
-    <label class="field">
-      Atau kode pengelola
-      <input type="text" value="<%= managerCode %>" readonly data-select-on-focus>
-    </label>
+    <div class="field">
+      <label for="manager-url">Tautan pengelola</label>
+      <input id="manager-url" type="text" value="<%= managerUrl %>" readonly data-select-on-focus>
+    </div>
+    <div class="field">
+      <label for="manager-code">Atau kode pengelola</label>
+      <input id="manager-code" type="text" value="<%= managerCode %>" readonly data-select-on-focus>
+    </div>
   </details>
 
-  <details class="danger-zone">
+  <details class="disclosure danger-zone">
     <summary>Hapus agenda</summary>
     <form class="form" method="post" action="/a/<%= agenda.slug %>/hapus">
       <%- include('partials/csrf') %>
-      <p class="note">
+      <p class="hint">
         Agenda, pilihan waktu, suara, dan konfirmasi kehadiran akan dihapus
         permanen. Tautan agenda tidak bisa dibuka lagi.
       </p>
-      <label class="choice">
+      <label class="toggle-row">
         <input type="checkbox" name="konfirmasi" value="ya" required>
-        Ya, hapus agenda ini secara permanen
+        <span>Ya, hapus agenda ini secara permanen</span>
       </label>
-      <button type="submit" class="danger-button">Hapus agenda</button>
+      <button type="submit" class="button button-danger">Hapus agenda</button>
     </form>
   </details>
 
@@ -270,14 +298,11 @@
 </section>
 <% } %>
 
-<section class="share">
-  <label class="field">
-    Tautan berbagi
-    <input type="text" value="<%= shareUrl %>" readonly data-select-on-focus>
-  </label>
-  <p class="note"><%= privacyNotice %></p>
-  <p class="note">Agenda ini dihapus otomatis sekitar <%= expiresLabel %>.</p>
-</section>
+<% if (!justCreated) { %>
+<%- include('partials/share') %>
+<% } %>
+
+<p class="fine-print"><%= privacyNotice %> Agenda ini dihapus otomatis sekitar <%= expiresLabel %>.</p>
 
 <script type="module" src="/agenda.js"></script>
 

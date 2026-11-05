@@ -2,15 +2,30 @@
 <html lang="id">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e111a" media="(prefers-color-scheme: dark)">
   <% if (locals.noindex) { %>
   <meta name="robots" content="noindex, nofollow">
   <% } %>
   <title><%= title %> · LobbyQuest</title>
+  <meta name="description" content="<%= locals.description || 'Atur jadwal mabar dan nongkrong bareng teman: voting waktu, tetapkan jadwal, lalu ready check. Tanpa akun.' %>">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/chakra-petch-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+  <a class="skip-link" href="#konten">Lewati ke konten</a>
   <header class="site-header">
-    <a class="brand" href="/">LobbyQuest</a>
+    <div class="wrap header-inner">
+      <a class="brand" href="/">
+        <img src="/logo.svg" alt="" width="28" height="28">
+        <span>LobbyQuest</span>
+      </a>
+      <% if (!locals.hideHeaderCta) { %>
+      <a class="header-cta" href="/agenda/baru">Buat agenda</a>
+      <% } %>
+    </div>
   </header>
-  <main class="container">
+  <main id="konten" class="wrap" tabindex="-1">
