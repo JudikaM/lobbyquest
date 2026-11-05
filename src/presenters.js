@@ -16,12 +16,6 @@ function avatarClass(id) {
   return `avatar-${Number(id) % AVATAR_COLORS}`;
 }
 
-// Lebar bar ketersediaan dalam kelipatan 10% (class fill-0 … fill-10).
-function fillClass(count, total) {
-  if (!total) return 'fill-0';
-  return `fill-${Math.round((Math.min(count, total) / total) * 10)}`;
-}
-
 // Kelas lebar mark data dalam langkah 2% (w-0 … w-100); nilai bukan nol
 // minimal w-2 agar bar kecil tetap terlihat.
 function widthClass(count, total) {
@@ -35,4 +29,4 @@ function growClass(count) {
   return `g-${Math.max(0, Math.min(50, Number(count) || 0))}`;
 }
 
-module.exports = { initial, avatarClass, fillClass, widthClass, growClass };
+module.exports = { initial, avatarClass, widthClass, growClass };
